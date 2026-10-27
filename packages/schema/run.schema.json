@@ -110,6 +110,26 @@
           },
           "title": "Evidence Frames",
           "type": "array"
+        },
+        "node_ids": {
+          "description": "Graph nodes to highlight",
+          "items": {
+            "type": "string"
+          },
+          "title": "Node Ids",
+          "type": "array"
+        },
+        "seconds": {
+          "default": 0.0,
+          "description": "Time attributable to the finding",
+          "title": "Seconds",
+          "type": "number"
+        },
+        "share": {
+          "default": 0.0,
+          "description": "seconds / total recording time",
+          "title": "Share",
+          "type": "number"
         }
       },
       "required": [
@@ -283,6 +303,23 @@
           },
           "title": "Step Indexes",
           "type": "array"
+        },
+        "avg_duration": {
+          "default": 0.0,
+          "title": "Avg Duration",
+          "type": "number"
+        },
+        "share": {
+          "default": 0.0,
+          "description": "Fraction of the recording spent on this node, 0..1",
+          "title": "Share",
+          "type": "number"
+        },
+        "is_wait": {
+          "default": false,
+          "description": "The action is waiting on the system, not working",
+          "title": "Is Wait",
+          "type": "boolean"
         }
       },
       "required": [
@@ -395,6 +432,61 @@
       ],
       "title": "StepLabel",
       "type": "object"
+    },
+    "Summary": {
+      "properties": {
+        "total_duration": {
+          "default": 0.0,
+          "title": "Total Duration",
+          "type": "number"
+        },
+        "steps": {
+          "default": 0,
+          "title": "Steps",
+          "type": "integer"
+        },
+        "labelled_steps": {
+          "default": 0,
+          "title": "Labelled Steps",
+          "type": "integer"
+        },
+        "applications": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Applications",
+          "type": "array"
+        },
+        "app_switches": {
+          "default": 0,
+          "title": "App Switches",
+          "type": "integer"
+        },
+        "loops": {
+          "default": 0,
+          "title": "Loops",
+          "type": "integer"
+        },
+        "wait_duration": {
+          "default": 0.0,
+          "title": "Wait Duration",
+          "type": "number"
+        },
+        "longest_step_index": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Longest Step Index"
+        }
+      },
+      "title": "Summary",
+      "type": "object"
     }
   },
   "properties": {
@@ -453,6 +545,9 @@
     },
     "graph": {
       "$ref": "#/$defs/Graph"
+    },
+    "summary": {
+      "$ref": "#/$defs/Summary"
     },
     "findings": {
       "items": {

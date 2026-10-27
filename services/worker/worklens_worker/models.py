@@ -74,6 +74,9 @@ class Node(BaseModel):
     visits: int
     total_duration: float
     step_indexes: list[int]
+    avg_duration: float = 0.0
+    share: float = Field(default=0.0, description="Fraction of the recording spent on this node, 0..1")
+    is_wait: bool = Field(default=False, description="The action is waiting on the system, not working")
 
 
 class Edge(BaseModel):
@@ -94,6 +97,20 @@ class Finding(BaseModel):
     severity: Literal["low", "medium", "high"]
     step_indexes: list[int]
     evidence_frames: list[int]
+    node_ids: list[str] = Field(default_factory=list, description="Graph nodes to highlight")
+    seconds: float = Field(default=0.0, description="Time attributable to the finding")
+    share: float = Field(default=0.0, description="seconds / total recording time")
+
+
+class Summary(BaseModel):
+    total_duration: float = 0.0
+    steps: int = 0
+    labelled_steps: int = 0
+    applications: list[str] = Field(default_factory=list)
+    app_switches: int = 0
+    loops: int = 0
+    wait_duration: float = 0.0
+    longest_step_index: int | None = None
 
 
 class Run(BaseModel):
@@ -106,6 +123,7 @@ class Run(BaseModel):
     boundaries: list[Boundary] = Field(default_factory=list)
     steps: list[Step] = Field(default_factory=list)
     graph: Graph = Field(default_factory=Graph)
+    summary: Summary = Field(default_factory=Summary)
     findings: list[Finding] = Field(default_factory=list)
     model_calls: list[ModelCall] = Field(default_factory=list)
 

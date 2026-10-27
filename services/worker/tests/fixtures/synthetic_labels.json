@@ -1,0 +1,18 @@
+{
+  "source": "synthetic-invoice.mp4",
+  "duration": 95.0,
+  "steps": [
+    {"t_start": 0,  "t_end": 4,  "application": "Mail", "action": "select invoice email", "object": "INV-20481", "data_fields": ["Acme Supplies", "Invoice INV-20481 - 4,250.00 GBP"], "confidence": 0.9},
+    {"t_start": 4,  "t_end": 6,  "application": "Mail", "action": "open invoice email", "object": "INV-20481", "data_fields": ["INV-20481"], "confidence": 0.9},
+    {"t_start": 6,  "t_end": 12, "application": "Mail", "action": "open attachment", "object": "invoice-20481.pdf", "data_fields": ["invoice-20481.pdf"], "confidence": 0.85},
+    {"t_start": 12, "t_end": 20, "application": "PDF Viewer", "action": "read invoice PDF", "object": "INV-20481", "data_fields": ["INV-20481", "Acme Supplies", "4,250.00", "PO-7731", "2026-10-15"], "confidence": 0.9},
+    {"t_start": 20, "t_end": 41, "application": "ERP - Accounts Payable", "action": "wait for invoice form to load", "object": "invoice form", "data_fields": [], "confidence": 0.95},
+    {"t_start": 41, "t_end": 58, "application": "ERP - Accounts Payable", "action": "fill invoice form", "object": "INV-20481", "data_fields": ["Supplier: Acme Supplies", "Invoice no: INV-20481", "Amount: 4,250.00", "PO: PO-7731"], "confidence": 0.9},
+    {"t_start": 58, "t_end": 67, "application": "Sheets", "action": "check PO in register", "object": "PO-7731", "data_fields": ["PO-7731", "Acme Supplies", "4,250.00"], "confidence": 0.85},
+    {"t_start": 67, "t_end": 80, "application": "ERP - Accounts Payable", "action": "fill invoice form and submit", "object": "INV-20481", "data_fields": ["Due date: 2026-11-14", "Submitted"], "confidence": 0.9},
+    {"t_start": 80, "t_end": 83, "application": "Mail", "action": "select invoice email", "object": "INV-20481", "data_fields": ["Invoice INV-20481"], "confidence": 0.9},
+    {"t_start": 83, "t_end": 85, "application": "Mail", "action": "click Reply", "object": "Invoice INV-20481", "data_fields": [], "confidence": 0.8},
+    {"t_start": 85, "t_end": 91, "application": "Mail", "action": "send approval reply", "object": "Invoice INV-20481", "data_fields": ["approved for payment", "AP-000912"], "confidence": 0.9},
+    {"t_start": 91, "t_end": 95, "application": "Mail", "action": "verify approval reply", "object": "Invoice INV-20481", "data_fields": [], "confidence": 0.8}
+  ]
+}

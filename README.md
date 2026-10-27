@@ -19,10 +19,12 @@ steps
    │  3. label       Meta Muse Spark reads the first, last and next frame of each step
    ▼                  and returns {application, action, object, data_fields, confidence} as strict JSON
 labelled steps
-   │  4. build       deterministic: merge repeats, order, sum durations        (next)
-   │  5. rules       long step, loop, app-switch with copy-paste               (next)
+   │  4. build       deterministic, no model: same screen merged into one node, visits counted,
+   │                 durations summed, transitions become edges
+   │  5. rules       three rules, no model: long step (>20% of the run), loop (screen seen again),
+   │                 app switch with the same values on both sides (hand re-keying)
    ▼
-process map + findings + JSON / BPMN export                                    (next)
+process map + findings with evidence frames + JSON / BPMN 2.0 export
 ```
 
 ### Which Meta model does what
@@ -62,13 +64,51 @@ Output for the synthetic recording (95 s, 12 steps, one long wait, one loop back
 11   91.0s   4.0s  Mail                     verify approval reply           Invoice INV-20481
 ```
 
-`worklens run recording.mp4 --no-label` runs sampling and detection only. Tests: `cd services/worker && pytest`.
+Then the graph and the findings, from the same run (no model calls; `worklens rebuild <run_id>` recomputes them):
+
+```
+process map
+  n1      7.0s    7%  Mail                       select invoice email  2x
+  n2      2.0s    2%  Mail                       open invoice email
+  n3      6.0s    6%  Mail                       open attachment
+  n4      8.0s    8%  PDF Viewer                 read invoice PDF
+  n5     21.0s   22%  ERP - Accounts Payable     wait for invoice form to load  wait
+  n6     17.0s   18%  ERP - Accounts Payable     fill invoice form
+  n7      9.0s    9%  Sheets                     check PO in register
+  n8     13.0s   14%  ERP - Accounts Payable     fill invoice form and submit
+  n9      2.0s    2%  Mail                       click Reply
+  n10     6.0s    6%  Mail                       send approval reply
+  n11     4.0s    4%  Mail                       verify approval reply
+  n1 -> n2 ... n8 -> n1  (the loop)  n1 -> n9 ...
+
+findings
+  [high  ] app-switch-copy  Values re-keyed from PDF Viewer into ERP - Accounts Payable
+           1 switch with the same values on both screens (4,250.00, Acme Supplies, INV-20481, PO-7731).
+           17 s spent keying data that already exists in PDF Viewer.
+  [high  ] loop             Back to Mail 2 times
+           The user left Mail and came back 1 time; the return trip cost 15 s (16%).
+           Detour via PDF Viewer -> ERP - Accounts Payable -> Sheets -> ERP - Accounts Payable.
+  [medium] long-step        21 s waiting on ERP - Accounts Payable
+           Step 4 took 21 s, 22% of the recording. The user was waiting for the system, not working.
+  [medium] app-switch-copy  Values cross-checked by hand between ERP - Accounts Payable and Sheets
+```
+
+Every finding carries `step_indexes`, `evidence_frames` (frame numbers to show as thumbnails) and `node_ids` (graph nodes to highlight), so the findings view is a pure render of `run.json`.
+
+```bash
+worklens run recording.mp4 --no-label     # sampling and detection only, no model calls
+worklens show <run_id>                    # steps, process map, findings
+worklens export <run_id> --format bpmn    # BPMN 2.0 XML with diagram layout; opens in bpmn.io with no warnings
+worklens export <run_id> --format json    # the Run, validated by packages/schema/run.schema.json
+```
+
+Tests: `cd services/worker && pytest` (14 tests, all offline: the graph, rules and export tests use the cached labels in `tests/fixtures`).
 
 ## Layout
 
 ```
 apps/web/            Next.js UI (next)
-services/worker/     pipeline: sample -> detect -> label -> build -> rules -> export
+services/worker/     pipeline: sample -> detect -> label -> build (graph.py) -> rules (rules.py) -> export (export.py)
 packages/schema/     run.schema.json, the contract for the export (worklens schema)
 samples/             synthetic recording generator; no real data
 docs/                architecture and judging notes
