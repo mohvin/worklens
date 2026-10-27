@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "sync": "node scripts/sync-samples.mjs",
+    "predev": "node scripts/sync-samples.mjs",
+    "prebuild": "node scripts/sync-samples.mjs",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start"

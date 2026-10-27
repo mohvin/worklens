@@ -2,6 +2,7 @@
 
     worklens run samples/synthetic-invoice.mp4          # all stages
     worklens run recording.mp4 --no-label                # stop before model calls
+    worklens run samples/synthetic-invoice.mp4 --cache samples/runs/synthetic-invoice/cache   # replay, $0
     worklens show <run_id>                               # print steps, graph and findings
     worklens export <run_id> --format bpmn               # write run.bpmn (or run.json) next to run.json
     worklens schema                                      # write packages/schema/run.schema.json
@@ -10,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 from pathlib import Path
 
 import typer
@@ -45,12 +47,19 @@ def run(
     fps: float = typer.Option(1.0, help="Frames sampled per second"),
     do_label: bool = typer.Option(True, "--label/--no-label", help="Call the Meta model to label steps"),
     workers: int = typer.Option(4, help="Parallel model calls"),
+    cache: Path | None = typer.Option(None, exists=True, file_okay=False, help="Seed the model cache from this directory (replay without API calls)"),
 ) -> None:
     """Run the pipeline on a screen recording."""
     _load_env()
     store = _store(runs_dir)
     r, run_dir = store.new_run(video)
     typer.echo(f"run {r.id} -> {run_dir}")
+    if cache:
+        n = 0
+        for f in cache.glob("*.json"):
+            shutil.copy(f, run_dir / "cache" / f.name)
+            n += 1
+        typer.echo(f"seeded cache with {n} responses from {cache}")
 
     r = sample(r, run_dir, video, fps=fps)
     store.save(r)

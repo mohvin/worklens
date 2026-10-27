@@ -19,9 +19,10 @@ from typing import Any
 
 import httpx
 
+from .imageops import fingerprint
 from .models import ModelCall
 
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v3"  # v3: cache key uses the frame fingerprint, not the JPEG bytes
 
 
 @dataclass
@@ -50,12 +51,30 @@ def image_part(path: Path) -> dict[str, Any]:
     return {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
 
 
+def prompt_key(model: str, system: str, user_text: str, schema_name: str) -> str:
+    return hashlib.sha256(f"{PROMPT_VERSION}|{model}|{schema_name}|{system}|{user_text}".encode()).hexdigest()[:24]
+
+
 def cache_key(model: str, system: str, user_text: str, images: list[Path], schema_name: str) -> str:
     h = hashlib.sha256()
-    h.update(f"{PROMPT_VERSION}|{model}|{schema_name}|{system}|{user_text}".encode())
+    h.update(prompt_key(model, system, user_text, schema_name).encode())
     for p in images:
-        h.update(hashlib.sha256(p.read_bytes()).digest())
+        h.update(fingerprint(p).encode())
     return h.hexdigest()[:24]
+
+
+NEAR_BITS = 3  # per hash, per frame: a different JPEG encoder flips at most a bit or two
+
+
+def _hamming(a: str, b: str) -> int:
+    return bin(int(a, 16) ^ int(b, 16)).count("1")
+
+
+def fingerprints_match(a: str, b: str, bits: int = NEAR_BITS) -> bool:
+    """Same size and both perceptual hashes within `bits` of each other."""
+    sa, pa, da = a.split(":")
+    sb, pb, db = b.split(":")
+    return sa == sb and _hamming(pa, pb) <= bits and _hamming(da, db) <= bits
 
 
 class LLMClient:
@@ -75,6 +94,21 @@ class LLMClient:
             timeout=cfg.timeout_s,
         )
 
+    def _near_hit(self, pkey: str, fps: list[str]) -> str | None:
+        """Cache entry for the same prompt whose frames look the same (re-extracted video)."""
+        for side in self.cache_dir.glob("*.fp.json"):
+            try:
+                meta = json.loads(side.read_text())
+            except json.JSONDecodeError:
+                continue
+            if meta.get("prompt") != pkey or len(meta.get("fps", [])) != len(fps):
+                continue
+            if all(fingerprints_match(a, b) for a, b in zip(fps, meta["fps"])):
+                key = side.name[: -len(".fp.json")]
+                if (self.cache_dir / f"{key}.json").exists():
+                    return key
+        return None
+
     def structured(
         self,
         system: str,
@@ -86,12 +120,16 @@ class LLMClient:
     ) -> tuple[dict[str, Any] | None, ModelCall]:
         """Return (parsed JSON or None, call record). Cached by content."""
         key = cache_key(self.cfg.model, system, user_text, images, schema_name)
-        cached = self.cache_dir / f"{key}.json"
-        if cached.exists():
-            data = json.loads(cached.read_text())
-            call = ModelCall(stage=self.stage, model=self.cfg.model, cache_key=key, cached=True, latency_s=0.0)
+        pkey = prompt_key(self.cfg.model, system, user_text, schema_name)
+        fps = [fingerprint(p) for p in images]
+        hit = key if (self.cache_dir / f"{key}.json").exists() else self._near_hit(pkey, fps)
+        if hit:
+            data = json.loads((self.cache_dir / f"{hit}.json").read_text())
+            call = ModelCall(stage=self.stage, model=self.cfg.model, cache_key=hit, cached=True, latency_s=0.0)
             self.calls.append(call)
             return data, call
+        cached = self.cache_dir / f"{key}.json"
+        sidecar = self.cache_dir / f"{key}.fp.json"
 
         body = {
             "model": self.cfg.model,
@@ -131,6 +169,7 @@ class LLMClient:
                     continue
                 data = json.loads(content)
                 cached.write_text(json.dumps(data))
+                sidecar.write_text(json.dumps({"prompt": pkey, "fps": fps}))
                 call = ModelCall(
                     stage=self.stage, model=self.cfg.model, cache_key=key, cached=False,
                     latency_s=round(latency, 3),

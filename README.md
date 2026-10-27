@@ -34,7 +34,11 @@ process map + findings with evidence frames + JSON / BPMN 2.0 export
 | **Muse Spark 1.3** (multimodal) | label | Looks at three frames per step and names the application, action, object and data fields. Strict JSON schema, temperature 0, low reasoning effort, one retry with a bigger token budget. |
 | **SAM 3.1** | detect | Segments each kept frame into UI regions; a change in the region set marks a step boundary. Adapter is stubbed in `detect.py` pending Meta Model API access; the pixel-diff detector is the shipped fallback. |
 
-Every model call is cached on disk by content hash, so a run can be replayed with zero API calls, and recorded with tokens, latency and cost in `run.json`.
+Every model call is cached on disk, keyed by the prompt and a perceptual fingerprint of the frames (so the cache survives re-extracting the video on another machine), and recorded with tokens, latency and cost in `run.json`. A complete run of the sample recording is checked in under `samples/runs/synthetic-invoice/`, so the pipeline and the UI can be replayed with zero API calls:
+
+```bash
+worklens run samples/synthetic-invoice.mp4 --cache samples/runs/synthetic-invoice/cache   # 12 cached, $0.0000
+```
 
 ## Run it
 
@@ -108,9 +112,11 @@ worklens export <run_id> --format json    # the Run, validated by packages/schem
 cd apps/web && npm install && npm run dev     # http://localhost:3000, reads ./runs
 ```
 
+The deployed demo serves the checked-in replay run; `scripts/sync-samples.mjs` bundles `samples/runs/*` into the app at build time, so Vercel needs no backend, no database and no model key. Deploy: import the repo on Vercel with root directory `apps/web` (keep "include source files outside the root directory" on).
+
 One page per run: the recording as a timeline strip (colour = application, hatched = waiting, braces = findings), the process map with the loop drawn as a back-edge, the frames behind any box you click, and the top 3 findings with their evidence frames. Download BPMN / JSON from the header.
 
-Tests: `cd services/worker && pytest` (14 tests, all offline: the graph, rules and export tests use the cached labels in `tests/fixtures`).
+Tests: `cd services/worker && pytest` (19 tests, all offline: the graph, rules and export tests use the cached labels in `tests/fixtures`).
 
 ## Layout
 
@@ -118,7 +124,7 @@ Tests: `cd services/worker && pytest` (14 tests, all offline: the graph, rules a
 apps/web/            Next.js 15 findings view: timeline, process map, evidence frames, findings, export
 services/worker/     pipeline: sample -> detect -> label -> build (graph.py) -> rules (rules.py) -> export (export.py)
 packages/schema/     run.schema.json, the contract for the export (worklens schema)
-samples/             synthetic recording generator; no real data
+samples/             synthetic recording generator and samples/runs/, the checked-in replay run (frames, labels, model cache)
 docs/                architecture and judging notes
 ```
 

@@ -2,17 +2,18 @@
 
 import type { Run } from "@/lib/types";
 import { fmtClock, fmtSeconds, fmtPct } from "@/lib/types";
-import { frameUrl, stepsOf } from "@/lib/view";
+import { frameUrl, hasFrame, stepsOf, type FrameSource } from "@/lib/view";
 
 interface Props {
   run: Run;
+  src: FrameSource;
   colors: Map<string, string>;
   nodeId: string | null;
   hotSteps: Set<number>;
   onClose: () => void;
 }
 
-export default function NodeDrawer({ run, colors, nodeId, hotSteps, onClose }: Props) {
+export default function NodeDrawer({ run, src, colors, nodeId, hotSteps, onClose }: Props) {
   const node = run.graph.nodes.find((n) => n.id === nodeId);
   if (!node) {
     return <div className="drawer empty">Click a box on the map, a segment on the timeline or a finding to see the frames behind it.</div>;
@@ -41,8 +42,9 @@ export default function NodeDrawer({ run, colors, nodeId, hotSteps, onClose }: P
         </ul>
       )}
       {steps.map((s) => {
-        const frames = run.frames.filter((f) => f.index >= s.frame_start && f.index <= s.frame_end && f.kept);
-        const shown = frames.length ? frames : run.frames.slice(s.frame_start, s.frame_end + 1);
+        const inStep = run.frames.filter((f) => f.index >= s.frame_start && f.index <= s.frame_end);
+        const kept = inStep.filter((f) => f.kept && hasFrame(src, f.index));
+        const shown = kept.length ? kept : inStep.filter((f) => hasFrame(src, f.index)).slice(0, 1);
         return (
           <div className="stepframes" key={s.index}>
             <h4>
@@ -54,7 +56,7 @@ export default function NodeDrawer({ run, colors, nodeId, hotSteps, onClose }: P
             <div className="filmstrip">
               {shown.map((f) => (
                 <figure key={f.index} className={hotSteps.has(s.index) ? "evidence" : undefined}>
-                  <img src={frameUrl(run, f.index)} alt={`Frame at ${fmtClock(f.t)}`} loading="lazy" width={220} height={124} />
+                  <img src={frameUrl(run, src, f.index)} alt={`Frame at ${fmtClock(f.t)}`} loading="lazy" width={220} height={124} />
                   <figcaption>{fmtClock(f.t)} · frame {f.index}</figcaption>
                 </figure>
               ))}

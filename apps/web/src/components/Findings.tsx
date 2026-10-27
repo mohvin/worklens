@@ -3,11 +3,11 @@
 import { useState } from "react";
 import type { Run } from "@/lib/types";
 import { fmtClock, fmtSeconds, fmtPct } from "@/lib/types";
-import { frameUrl } from "@/lib/view";
+import { frameUrl, type FrameSource } from "@/lib/view";
 
-interface Props { run: Run; activeIndex: number | null; onSelect: (i: number | null) => void }
+interface Props { run: Run; src: FrameSource; activeIndex: number | null; onSelect: (i: number | null) => void }
 
-export default function Findings({ run, activeIndex, onSelect }: Props) {
+export default function Findings({ run, src, activeIndex, onSelect }: Props) {
   const [all, setAll] = useState(false);
   if (run.findings.length === 0) {
     return <div className="drawer empty">No long step, loop or re-keying found. Either the task is tight or the recording is short.</div>;
@@ -27,7 +27,7 @@ export default function Findings({ run, activeIndex, onSelect }: Props) {
             <div className="thumbs">
               {f.evidence_frames.slice(0, 4).map((fi) => (
                 <figure key={fi}>
-                  <img src={frameUrl(run, fi)} alt={`Evidence frame ${fi}`} loading="lazy" width={132} height={74} />
+                  <img src={frameUrl(run, src, fi)} alt={`Evidence frame ${fi}`} loading="lazy" width={132} height={74} />
                   <figcaption>{fmtClock(run.frames[Math.min(fi, run.frames.length - 1)]?.t ?? 0)}</figcaption>
                 </figure>
               ))}

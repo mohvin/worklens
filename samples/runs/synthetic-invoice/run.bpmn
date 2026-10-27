@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="defs_synthetic-invoice" targetNamespace="https://worklens.purplelab.ai/bpmn" exporter="WorkLens" exporterVersion="0.1">
+  <bpmn:process id="worklens_synthetic-invoice" name="synthetic-invoice.mp4" isExecutable="false">
+    <bpmn:startEvent id="start" name="Start" />
+    <bpmn:task id="n1" name="Mail: select invoice email (9 s, 2x)">
+      <bpmn:documentation>2 visit(s), 9.0 s total, 9% of the recording. Object: INV-20481</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n2" name="Mail: open attachment (6 s)">
+      <bpmn:documentation>1 visit(s), 6.0 s total, 6% of the recording. Object: invoice-20481.pdf</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n3" name="PDF Viewer: read invoice PDF (8 s)">
+      <bpmn:documentation>1 visit(s), 8.0 s total, 8% of the recording. Object: INV-20481</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n4" name="ERP - Accounts Payable: wait for invoice form (21 s)">
+      <bpmn:documentation>1 visit(s), 21.0 s total, 22% of the recording. Object: invoice form</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n5" name="ERP - Accounts Payable: fill invoice form (17 s)">
+      <bpmn:documentation>1 visit(s), 17.0 s total, 18% of the recording. Object: INV-20481</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n6" name="Sheets: check PO in register (9 s)">
+      <bpmn:documentation>1 visit(s), 9.0 s total, 9% of the recording. Object: PO-7731</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n7" name="ERP - Accounts Payable: fill invoice form and submit (13 s)">
+      <bpmn:documentation>1 visit(s), 13.0 s total, 14% of the recording. Object: INV-20481</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n8" name="Mail: click Reply (2 s)">
+      <bpmn:documentation>1 visit(s), 2.0 s total, 2% of the recording. Object: INV-20481</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n9" name="Mail: send approval reply (6 s)">
+      <bpmn:documentation>1 visit(s), 6.0 s total, 6% of the recording. Object: Invoice INV-20481</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:task id="n10" name="Mail: view approval confirmation (4 s)">
+      <bpmn:documentation>1 visit(s), 4.0 s total, 4% of the recording. Object: Invoice INV-20481</bpmn:documentation>
+    </bpmn:task>
+    <bpmn:endEvent id="end" name="End" />
+    <bpmn:sequenceFlow id="flow_start" sourceRef="start" targetRef="n1" />
+    <bpmn:sequenceFlow id="flow_1" sourceRef="n1" targetRef="n2" />
+    <bpmn:sequenceFlow id="flow_2" sourceRef="n2" targetRef="n3" />
+    <bpmn:sequenceFlow id="flow_3" sourceRef="n3" targetRef="n4" />
+    <bpmn:sequenceFlow id="flow_4" sourceRef="n4" targetRef="n5" />
+    <bpmn:sequenceFlow id="flow_5" sourceRef="n5" targetRef="n6" />
+    <bpmn:sequenceFlow id="flow_6" sourceRef="n6" targetRef="n7" />
+    <bpmn:sequenceFlow id="flow_7" sourceRef="n7" targetRef="n1" />
+    <bpmn:sequenceFlow id="flow_8" sourceRef="n1" targetRef="n8" />
+    <bpmn:sequenceFlow id="flow_9" sourceRef="n8" targetRef="n9" />
+    <bpmn:sequenceFlow id="flow_10" sourceRef="n9" targetRef="n10" />
+    <bpmn:sequenceFlow id="flow_end" sourceRef="n10" targetRef="end" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="diagram_synthetic-invoice">
+    <bpmndi:BPMNPlane id="plane_synthetic-invoice" bpmnElement="worklens_synthetic-invoice">
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="40" y="142" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n1_di" bpmnElement="n1"><dc:Bounds x="120" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n2_di" bpmnElement="n2"><dc:Bounds x="370" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n3_di" bpmnElement="n3"><dc:Bounds x="620" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n4_di" bpmnElement="n4"><dc:Bounds x="870" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n5_di" bpmnElement="n5"><dc:Bounds x="1120" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n6_di" bpmnElement="n6"><dc:Bounds x="1370" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n7_di" bpmnElement="n7"><dc:Bounds x="1620" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n8_di" bpmnElement="n8"><dc:Bounds x="1870" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n9_di" bpmnElement="n9"><dc:Bounds x="2120" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="n10_di" bpmnElement="n10"><dc:Bounds x="2370" y="120" width="180" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_di" bpmnElement="end"><dc:Bounds x="2620" y="142" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="flow_start_di" bpmnElement="flow_start"><di:waypoint x="76" y="160" /><di:waypoint x="120" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_1_di" bpmnElement="flow_1"><di:waypoint x="300" y="160" /><di:waypoint x="370" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_2_di" bpmnElement="flow_2"><di:waypoint x="550" y="160" /><di:waypoint x="620" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_3_di" bpmnElement="flow_3"><di:waypoint x="800" y="160" /><di:waypoint x="870" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_4_di" bpmnElement="flow_4"><di:waypoint x="1050" y="160" /><di:waypoint x="1120" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_5_di" bpmnElement="flow_5"><di:waypoint x="1300" y="160" /><di:waypoint x="1370" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_6_di" bpmnElement="flow_6"><di:waypoint x="1550" y="160" /><di:waypoint x="1620" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_7_di" bpmnElement="flow_7"><di:waypoint x="1710" y="200" /><di:waypoint x="1710" y="240" /><di:waypoint x="210" y="240" /><di:waypoint x="210" y="200" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_8_di" bpmnElement="flow_8"><di:waypoint x="300" y="160" /><di:waypoint x="1870" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_9_di" bpmnElement="flow_9"><di:waypoint x="2050" y="160" /><di:waypoint x="2120" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_10_di" bpmnElement="flow_10"><di:waypoint x="2300" y="160" /><di:waypoint x="2370" y="160" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_end_di" bpmnElement="flow_end"><di:waypoint x="2550" y="160" /><di:waypoint x="2620" y="160" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

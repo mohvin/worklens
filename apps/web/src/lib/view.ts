@@ -13,9 +13,20 @@ export function appColors(run: Run): Map<string, string> {
 export const nodeOfStep = (run: Run, stepIndex: number): Node | undefined =>
   run.graph.nodes.find((n) => n.step_indexes.includes(stepIndex));
 
-export const frameUrl = (run: Run, frameIndex: number): string => {
-  const f = run.frames[Math.max(0, Math.min(run.frames.length - 1, frameIndex))];
-  return `/api/runs/${run.id}/frames/${f.path.replace(/^frames\//, "")}`;
+// Where a run's frames are served from, and which of them exist (a replay
+// sample ships only the kept and evidence frames).
+export interface FrameSource { base: string; available: number[] | null }
+
+export const hasFrame = (src: FrameSource, i: number): boolean => src.available === null || src.available.includes(i);
+
+/** URL of a frame; a missing frame falls back to the nearest earlier one that exists. */
+export const frameUrl = (run: Run, src: FrameSource, frameIndex: number): string => {
+  let i = Math.max(0, Math.min(run.frames.length - 1, frameIndex));
+  if (src.available !== null && !src.available.includes(i)) {
+    const earlier = src.available.filter((a) => a <= i);
+    i = earlier.length ? Math.max(...earlier) : Math.min(...src.available);
+  }
+  return `${src.base}/${run.frames[i].path.replace(/^frames\//, "")}`;
 };
 
 export const stepsOf = (run: Run, node: Node): Step[] => node.step_indexes.map((i) => run.steps[i]);

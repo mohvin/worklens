@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Run } from "@/lib/types";
 import { fmtSeconds, fmtPct } from "@/lib/types";
-import { appColors } from "@/lib/view";
+import { appColors, type FrameSource } from "@/lib/view";
 import Timeline from "./Timeline";
 import ProcessMap from "./ProcessMap";
 import NodeDrawer from "./NodeDrawer";
@@ -12,8 +12,11 @@ import StepsTable from "./StepsTable";
 
 export interface Selection { nodeId: string | null; findingIndex: number | null }
 
-export default function RunView({ run }: { run: Run }) {
+interface Props { run: Run; frameBase: string; frames: number[] | null; sample: boolean }
+
+export default function RunView({ run, frameBase, frames, sample }: Props) {
   const [sel, setSel] = useState<Selection>({ nodeId: null, findingIndex: null });
+  const src = useMemo<FrameSource>(() => ({ base: frameBase, available: frames }), [frameBase, frames]);
   const colors = useMemo(() => appColors(run), [run]);
   const total = run.summary.total_duration || run.duration;
   const lost = run.findings.reduce((a, f) => a + f.seconds, 0);
@@ -32,7 +35,7 @@ export default function RunView({ run }: { run: Run }) {
       <div className="runhead">
         <h1>
           {run.source}
-          <small>run {run.id}</small>
+          <small>{sample ? "replay sample" : `run ${run.id}`}</small>
         </h1>
         <div className="facts">
           <span><b>{fmtSeconds(total)}</b> recorded</span>
@@ -64,7 +67,7 @@ export default function RunView({ run }: { run: Run }) {
       </section>
 
       <section className="block">
-        <NodeDrawer run={run} colors={colors} nodeId={sel.nodeId} hotSteps={hotSteps} onClose={() => selectNode(null)} />
+        <NodeDrawer run={run} src={src} colors={colors} nodeId={sel.nodeId} hotSteps={hotSteps} onClose={() => selectNode(null)} />
       </section>
 
       <section className="block">
@@ -72,7 +75,7 @@ export default function RunView({ run }: { run: Run }) {
           Where the time goes{" "}
           <span>{run.findings.length === 0 ? "nothing flagged" : `${fmtSeconds(lost)} of ${fmtSeconds(total)} (${fmtPct(lost / total)}) across ${run.findings.length} finding${run.findings.length === 1 ? "" : "s"}`}</span>
         </h2>
-        <Findings run={run} activeIndex={sel.findingIndex} onSelect={selectFinding} />
+        <Findings run={run} src={src} activeIndex={sel.findingIndex} onSelect={selectFinding} />
       </section>
 
       <section className="block">

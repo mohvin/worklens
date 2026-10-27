@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function RunPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const run = await getRun(id);
-  if (!run) notFound();
-  return <RunView run={run} />;
+  const loaded = await getRun(id);
+  if (!loaded) notFound();
+  return <RunView run={loaded.run} frameBase={loaded.frameBase} frames={loaded.frames} sample={loaded.sample} />;
 }

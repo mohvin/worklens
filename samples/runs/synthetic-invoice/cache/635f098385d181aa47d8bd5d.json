@@ -1,0 +1,1 @@
+{"action": "read invoice PDF", "application": "PDF Viewer", "confidence": 0.92, "data_fields": ["Invoice number: INV-20481", "Invoice date: 20 Oct 2026", "PO number: PO-7731", "Net: 3,541.67 GBP", "VAT 20%: 708.33 GBP", "Total: 4,250.00 GBP"], "object": "INV-20481"}

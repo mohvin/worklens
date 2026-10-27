@@ -1,0 +1,1 @@
+{"action": "fill invoice form and submit", "application": "ERP - Accounts Payable", "confidence": 0.95, "data_fields": ["Supplier: Acme Supplies Ltd", "Invoice no.: INV-20481", "Invoice date: 20/10/2026", "PO number: PO-7731", "Net: 3541.67", "VAT: 708.33", "Total: 4250.00", "Saved: AP-000912"], "object": "INV-20481"}

@@ -1,0 +1,1444 @@
+{
+  "id": "synthetic-invoice",
+  "source": "synthetic-invoice.mp4",
+  "duration": 94.8,
+  "fps_sampled": 1.0,
+  "status": "built",
+  "frames": [
+    {
+      "index": 0,
+      "t": 0.0,
+      "path": "frames/f00001.jpg",
+      "phash": "9838704347677e7c",
+      "kept": true
+    },
+    {
+      "index": 1,
+      "t": 1.0,
+      "path": "frames/f00002.jpg",
+      "phash": "9838704347677e7c",
+      "kept": false
+    },
+    {
+      "index": 2,
+      "t": 2.0,
+      "path": "frames/f00003.jpg",
+      "phash": "9838704347677e7c",
+      "kept": false
+    },
+    {
+      "index": 3,
+      "t": 3.0,
+      "path": "frames/f00004.jpg",
+      "phash": "9838704347677e7c",
+      "kept": false
+    },
+    {
+      "index": 4,
+      "t": 4.0,
+      "path": "frames/f00005.jpg",
+      "phash": "9878706347475e5e",
+      "kept": true
+    },
+    {
+      "index": 5,
+      "t": 5.0,
+      "path": "frames/f00006.jpg",
+      "phash": "9878706347475e5e",
+      "kept": false
+    },
+    {
+      "index": 6,
+      "t": 6.0,
+      "path": "frames/f00007.jpg",
+      "phash": "987378434f58477c",
+      "kept": true
+    },
+    {
+      "index": 7,
+      "t": 7.0,
+      "path": "frames/f00008.jpg",
+      "phash": "987378434f58477c",
+      "kept": false
+    },
+    {
+      "index": 8,
+      "t": 8.0,
+      "path": "frames/f00009.jpg",
+      "phash": "987378434f58477c",
+      "kept": false
+    },
+    {
+      "index": 9,
+      "t": 9.0,
+      "path": "frames/f00010.jpg",
+      "phash": "987378434f58477c",
+      "kept": false
+    },
+    {
+      "index": 10,
+      "t": 10.0,
+      "path": "frames/f00011.jpg",
+      "phash": "987378434f58477c",
+      "kept": false
+    },
+    {
+      "index": 11,
+      "t": 11.0,
+      "path": "frames/f00012.jpg",
+      "phash": "987378434f58477c",
+      "kept": false
+    },
+    {
+      "index": 12,
+      "t": 12.0,
+      "path": "frames/f00013.jpg",
+      "phash": "9878636367636743",
+      "kept": true
+    },
+    {
+      "index": 13,
+      "t": 13.0,
+      "path": "frames/f00014.jpg",
+      "phash": "9878636367636743",
+      "kept": false
+    },
+    {
+      "index": 14,
+      "t": 14.0,
+      "path": "frames/f00015.jpg",
+      "phash": "9878636367636743",
+      "kept": false
+    },
+    {
+      "index": 15,
+      "t": 15.0,
+      "path": "frames/f00016.jpg",
+      "phash": "9878636367636743",
+      "kept": false
+    },
+    {
+      "index": 16,
+      "t": 16.0,
+      "path": "frames/f00017.jpg",
+      "phash": "9878636367636743",
+      "kept": false
+    },
+    {
+      "index": 17,
+      "t": 17.0,
+      "path": "frames/f00018.jpg",
+      "phash": "9878636367636743",
+      "kept": false
+    },
+    {
+      "index": 18,
+      "t": 18.0,
+      "path": "frames/f00019.jpg",
+      "phash": "9878636367636743",
+      "kept": false
+    },
+    {
+      "index": 19,
+      "t": 19.0,
+      "path": "frames/f00020.jpg",
+      "phash": "9878636367636743",
+      "kept": false
+    },
+    {
+      "index": 20,
+      "t": 20.0,
+      "path": "frames/f00021.jpg",
+      "phash": "f670597076705978",
+      "kept": true
+    },
+    {
+      "index": 21,
+      "t": 21.0,
+      "path": "frames/f00022.jpg",
+      "phash": "f2705c7873705c78",
+      "kept": true
+    },
+    {
+      "index": 22,
+      "t": 22.0,
+      "path": "frames/f00023.jpg",
+      "phash": "f3705c7873704c78",
+      "kept": false
+    },
+    {
+      "index": 23,
+      "t": 23.0,
+      "path": "frames/f00024.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 24,
+      "t": 24.0,
+      "path": "frames/f00025.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 25,
+      "t": 25.0,
+      "path": "frames/f00026.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 26,
+      "t": 26.0,
+      "path": "frames/f00027.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 27,
+      "t": 27.0,
+      "path": "frames/f00028.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 28,
+      "t": 28.0,
+      "path": "frames/f00029.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 29,
+      "t": 29.0,
+      "path": "frames/f00030.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 30,
+      "t": 30.0,
+      "path": "frames/f00031.jpg",
+      "phash": "f3704c7873704c79",
+      "kept": false
+    },
+    {
+      "index": 31,
+      "t": 31.0,
+      "path": "frames/f00032.jpg",
+      "phash": "f3704c7073784c79",
+      "kept": true
+    },
+    {
+      "index": 32,
+      "t": 32.0,
+      "path": "frames/f00033.jpg",
+      "phash": "f3784c7073784c71",
+      "kept": false
+    },
+    {
+      "index": 33,
+      "t": 33.0,
+      "path": "frames/f00034.jpg",
+      "phash": "f3784c7073784c71",
+      "kept": false
+    },
+    {
+      "index": 34,
+      "t": 34.0,
+      "path": "frames/f00035.jpg",
+      "phash": "f3784c7073784c71",
+      "kept": false
+    },
+    {
+      "index": 35,
+      "t": 35.0,
+      "path": "frames/f00036.jpg",
+      "phash": "f3784c7073784c71",
+      "kept": false
+    },
+    {
+      "index": 36,
+      "t": 36.0,
+      "path": "frames/f00037.jpg",
+      "phash": "f3784c7073784c71",
+      "kept": false
+    },
+    {
+      "index": 37,
+      "t": 37.0,
+      "path": "frames/f00038.jpg",
+      "phash": "f3784c7073784c71",
+      "kept": false
+    },
+    {
+      "index": 38,
+      "t": 38.0,
+      "path": "frames/f00039.jpg",
+      "phash": "f3705c7073785c70",
+      "kept": false
+    },
+    {
+      "index": 39,
+      "t": 39.0,
+      "path": "frames/f00040.jpg",
+      "phash": "f2705c7073785d70",
+      "kept": true
+    },
+    {
+      "index": 40,
+      "t": 40.0,
+      "path": "frames/f00041.jpg",
+      "phash": "f670597076785970",
+      "kept": true
+    },
+    {
+      "index": 41,
+      "t": 41.0,
+      "path": "frames/f00042.jpg",
+      "phash": "834c73634e714e73",
+      "kept": true
+    },
+    {
+      "index": 42,
+      "t": 42.0,
+      "path": "frames/f00043.jpg",
+      "phash": "834c73634e714e73",
+      "kept": false
+    },
+    {
+      "index": 43,
+      "t": 43.0,
+      "path": "frames/f00044.jpg",
+      "phash": "834c73634e714e73",
+      "kept": false
+    },
+    {
+      "index": 44,
+      "t": 44.0,
+      "path": "frames/f00045.jpg",
+      "phash": "834c73634e714e73",
+      "kept": false
+    },
+    {
+      "index": 45,
+      "t": 45.0,
+      "path": "frames/f00046.jpg",
+      "phash": "834c73634e714e73",
+      "kept": false
+    },
+    {
+      "index": 46,
+      "t": 46.0,
+      "path": "frames/f00047.jpg",
+      "phash": "834e73634e714e71",
+      "kept": false
+    },
+    {
+      "index": 47,
+      "t": 47.0,
+      "path": "frames/f00048.jpg",
+      "phash": "834e73634e714e71",
+      "kept": false
+    },
+    {
+      "index": 48,
+      "t": 48.0,
+      "path": "frames/f00049.jpg",
+      "phash": "834e73634e714e71",
+      "kept": false
+    },
+    {
+      "index": 49,
+      "t": 49.0,
+      "path": "frames/f00050.jpg",
+      "phash": "834e73634e714e71",
+      "kept": false
+    },
+    {
+      "index": 50,
+      "t": 50.0,
+      "path": "frames/f00051.jpg",
+      "phash": "834e73634e714e71",
+      "kept": false
+    },
+    {
+      "index": 51,
+      "t": 51.0,
+      "path": "frames/f00052.jpg",
+      "phash": "834e73634e714e71",
+      "kept": false
+    },
+    {
+      "index": 52,
+      "t": 52.0,
+      "path": "frames/f00053.jpg",
+      "phash": "834e73634e714e71",
+      "kept": false
+    },
+    {
+      "index": 53,
+      "t": 53.0,
+      "path": "frames/f00054.jpg",
+      "phash": "834e73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 54,
+      "t": 54.0,
+      "path": "frames/f00055.jpg",
+      "phash": "834e73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 55,
+      "t": 55.0,
+      "path": "frames/f00056.jpg",
+      "phash": "834e73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 56,
+      "t": 56.0,
+      "path": "frames/f00057.jpg",
+      "phash": "834e73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 57,
+      "t": 57.0,
+      "path": "frames/f00058.jpg",
+      "phash": "834e73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 58,
+      "t": 58.0,
+      "path": "frames/f00059.jpg",
+      "phash": "b8382d7b4f735250",
+      "kept": true
+    },
+    {
+      "index": 59,
+      "t": 59.0,
+      "path": "frames/f00060.jpg",
+      "phash": "b8382d7b4f735250",
+      "kept": false
+    },
+    {
+      "index": 60,
+      "t": 60.0,
+      "path": "frames/f00061.jpg",
+      "phash": "b8382d7b4f735250",
+      "kept": false
+    },
+    {
+      "index": 61,
+      "t": 61.0,
+      "path": "frames/f00062.jpg",
+      "phash": "b8382d7b4f735250",
+      "kept": false
+    },
+    {
+      "index": 62,
+      "t": 62.0,
+      "path": "frames/f00063.jpg",
+      "phash": "ac382d7b5f725250",
+      "kept": false
+    },
+    {
+      "index": 63,
+      "t": 63.0,
+      "path": "frames/f00064.jpg",
+      "phash": "ac382d7b5f725250",
+      "kept": false
+    },
+    {
+      "index": 64,
+      "t": 64.0,
+      "path": "frames/f00065.jpg",
+      "phash": "ac382d7b5f725250",
+      "kept": false
+    },
+    {
+      "index": 65,
+      "t": 65.0,
+      "path": "frames/f00066.jpg",
+      "phash": "ac382d7b5f725250",
+      "kept": false
+    },
+    {
+      "index": 66,
+      "t": 66.0,
+      "path": "frames/f00067.jpg",
+      "phash": "ac382d7b5f725250",
+      "kept": false
+    },
+    {
+      "index": 67,
+      "t": 67.0,
+      "path": "frames/f00068.jpg",
+      "phash": "834e73664e714e71",
+      "kept": true
+    },
+    {
+      "index": 68,
+      "t": 68.0,
+      "path": "frames/f00069.jpg",
+      "phash": "834e73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 69,
+      "t": 69.0,
+      "path": "frames/f00070.jpg",
+      "phash": "834e73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 70,
+      "t": 70.0,
+      "path": "frames/f00071.jpg",
+      "phash": "934c73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 71,
+      "t": 71.0,
+      "path": "frames/f00072.jpg",
+      "phash": "934c73664e714e71",
+      "kept": false
+    },
+    {
+      "index": 72,
+      "t": 72.0,
+      "path": "frames/f00073.jpg",
+      "phash": "934e73624e714e71",
+      "kept": false
+    },
+    {
+      "index": 73,
+      "t": 73.0,
+      "path": "frames/f00074.jpg",
+      "phash": "934e73624e714e71",
+      "kept": false
+    },
+    {
+      "index": 74,
+      "t": 74.0,
+      "path": "frames/f00075.jpg",
+      "phash": "934e73614e714e71",
+      "kept": false
+    },
+    {
+      "index": 75,
+      "t": 75.0,
+      "path": "frames/f00076.jpg",
+      "phash": "934e73614e714e71",
+      "kept": false
+    },
+    {
+      "index": 76,
+      "t": 76.0,
+      "path": "frames/f00077.jpg",
+      "phash": "934e63634e714e71",
+      "kept": false
+    },
+    {
+      "index": 77,
+      "t": 77.0,
+      "path": "frames/f00078.jpg",
+      "phash": "934e63634e714e71",
+      "kept": false
+    },
+    {
+      "index": 78,
+      "t": 78.0,
+      "path": "frames/f00079.jpg",
+      "phash": "934e63634e714e71",
+      "kept": false
+    },
+    {
+      "index": 79,
+      "t": 79.0,
+      "path": "frames/f00080.jpg",
+      "phash": "934e63634e714e71",
+      "kept": false
+    },
+    {
+      "index": 80,
+      "t": 80.0,
+      "path": "frames/f00081.jpg",
+      "phash": "9878706347475e5e",
+      "kept": true
+    },
+    {
+      "index": 81,
+      "t": 81.0,
+      "path": "frames/f00082.jpg",
+      "phash": "9878706347475e5e",
+      "kept": false
+    },
+    {
+      "index": 82,
+      "t": 82.0,
+      "path": "frames/f00083.jpg",
+      "phash": "9878706347475e5e",
+      "kept": false
+    },
+    {
+      "index": 83,
+      "t": 83.0,
+      "path": "frames/f00084.jpg",
+      "phash": "987378434f58477c",
+      "kept": true
+    },
+    {
+      "index": 84,
+      "t": 84.0,
+      "path": "frames/f00085.jpg",
+      "phash": "987378434f58477c",
+      "kept": false
+    },
+    {
+      "index": 85,
+      "t": 85.0,
+      "path": "frames/f00086.jpg",
+      "phash": "987378474c78477c",
+      "kept": true
+    },
+    {
+      "index": 86,
+      "t": 86.0,
+      "path": "frames/f00087.jpg",
+      "phash": "987378474c78477c",
+      "kept": false
+    },
+    {
+      "index": 87,
+      "t": 87.0,
+      "path": "frames/f00088.jpg",
+      "phash": "986378475c78477c",
+      "kept": false
+    },
+    {
+      "index": 88,
+      "t": 88.0,
+      "path": "frames/f00089.jpg",
+      "phash": "986378475c78477c",
+      "kept": false
+    },
+    {
+      "index": 89,
+      "t": 89.0,
+      "path": "frames/f00090.jpg",
+      "phash": "987378475c58477c",
+      "kept": false
+    },
+    {
+      "index": 90,
+      "t": 90.0,
+      "path": "frames/f00091.jpg",
+      "phash": "b86378475c58477c",
+      "kept": false
+    },
+    {
+      "index": 91,
+      "t": 91.0,
+      "path": "frames/f00092.jpg",
+      "phash": "9838784767665e5c",
+      "kept": true
+    },
+    {
+      "index": 92,
+      "t": 92.0,
+      "path": "frames/f00093.jpg",
+      "phash": "9838784767665e5c",
+      "kept": false
+    },
+    {
+      "index": 93,
+      "t": 93.0,
+      "path": "frames/f00094.jpg",
+      "phash": "9838784767665e5c",
+      "kept": false
+    },
+    {
+      "index": 94,
+      "t": 94.0,
+      "path": "frames/f00095.jpg",
+      "phash": "9838784767665e5c",
+      "kept": false
+    }
+  ],
+  "boundaries": [
+    {
+      "index": 0,
+      "t": 4.0,
+      "frame_before": 3,
+      "frame_after": 4,
+      "score": 0.0471,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 1,
+      "t": 6.0,
+      "frame_before": 5,
+      "frame_after": 6,
+      "score": 0.091,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 2,
+      "t": 12.0,
+      "frame_before": 11,
+      "frame_after": 12,
+      "score": 0.1187,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 3,
+      "t": 20.0,
+      "frame_before": 19,
+      "frame_after": 20,
+      "score": 0.1125,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 4,
+      "t": 41.0,
+      "frame_before": 40,
+      "frame_after": 41,
+      "score": 0.0374,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 5,
+      "t": 58.0,
+      "frame_before": 57,
+      "frame_after": 58,
+      "score": 0.1009,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 6,
+      "t": 67.0,
+      "frame_before": 66,
+      "frame_after": 67,
+      "score": 0.0965,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 7,
+      "t": 80.0,
+      "frame_before": 79,
+      "frame_after": 80,
+      "score": 0.1029,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 8,
+      "t": 83.0,
+      "frame_before": 82,
+      "frame_after": 83,
+      "score": 0.0924,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 9,
+      "t": 85.0,
+      "frame_before": 84,
+      "frame_after": 85,
+      "score": 0.0304,
+      "method": "pixel-diff"
+    },
+    {
+      "index": 10,
+      "t": 91.0,
+      "frame_before": 90,
+      "frame_after": 91,
+      "score": 0.0916,
+      "method": "pixel-diff"
+    }
+  ],
+  "steps": [
+    {
+      "index": 0,
+      "t_start": 0.0,
+      "t_end": 4.0,
+      "duration": 4.0,
+      "frame_start": 0,
+      "frame_end": 3,
+      "label": {
+        "application": "Mail",
+        "action": "select invoice email",
+        "object": "INV-20481",
+        "data_fields": [
+          "Invoice INV-20481 - 4,250.00 GBP"
+        ],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 1,
+      "t_start": 4.0,
+      "t_end": 6.0,
+      "duration": 2.0,
+      "frame_start": 4,
+      "frame_end": 5,
+      "label": {
+        "application": "Mail",
+        "action": "select invoice email",
+        "object": "Invoice INV-20481",
+        "data_fields": [
+          "Acme Supplies",
+          "INV-20481",
+          "4,250.00 GBP"
+        ],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 2,
+      "t_start": 6.0,
+      "t_end": 12.0,
+      "duration": 6.0,
+      "frame_start": 6,
+      "frame_end": 11,
+      "label": {
+        "application": "Mail",
+        "action": "open attachment",
+        "object": "invoice-20481.pdf",
+        "data_fields": [
+          "invoice-20481.pdf (84 KB)"
+        ],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 3,
+      "t_start": 12.0,
+      "t_end": 20.0,
+      "duration": 8.0,
+      "frame_start": 12,
+      "frame_end": 19,
+      "label": {
+        "application": "PDF Viewer",
+        "action": "read invoice PDF",
+        "object": "INV-20481",
+        "data_fields": [
+          "Invoice number: INV-20481",
+          "Invoice date: 20 Oct 2026",
+          "PO number: PO-7731",
+          "Net: 3,541.67 GBP",
+          "VAT 20%: 708.33 GBP",
+          "Total: 4,250.00 GBP"
+        ],
+        "confidence": 0.92
+      },
+      "label_error": null
+    },
+    {
+      "index": 4,
+      "t_start": 20.0,
+      "t_end": 41.0,
+      "duration": 21.0,
+      "frame_start": 20,
+      "frame_end": 40,
+      "label": {
+        "application": "ERP - Accounts Payable",
+        "action": "wait for invoice form",
+        "object": "invoice form",
+        "data_fields": [],
+        "confidence": 0.98
+      },
+      "label_error": null
+    },
+    {
+      "index": 5,
+      "t_start": 41.0,
+      "t_end": 58.0,
+      "duration": 17.0,
+      "frame_start": 41,
+      "frame_end": 57,
+      "label": {
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form",
+        "object": "INV-20481",
+        "data_fields": [
+          "Supplier: Acme Supplies Ltd",
+          "Invoice no.: INV-20481",
+          "Invoice date: 20/10/2026",
+          "PO number: PO-7731"
+        ],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 6,
+      "t_start": 58.0,
+      "t_end": 67.0,
+      "duration": 9.0,
+      "frame_start": 58,
+      "frame_end": 66,
+      "label": {
+        "application": "Sheets",
+        "action": "check PO in register",
+        "object": "PO-7731",
+        "data_fields": [
+          "PO-7731",
+          "Acme Supplies Ltd",
+          "4,250.00",
+          "Received"
+        ],
+        "confidence": 0.92
+      },
+      "label_error": null
+    },
+    {
+      "index": 7,
+      "t_start": 67.0,
+      "t_end": 80.0,
+      "duration": 13.0,
+      "frame_start": 67,
+      "frame_end": 79,
+      "label": {
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form and submit",
+        "object": "INV-20481",
+        "data_fields": [
+          "Supplier: Acme Supplies Ltd",
+          "Invoice no.: INV-20481",
+          "Invoice date: 20/10/2026",
+          "PO number: PO-7731",
+          "Net: 3541.67",
+          "VAT: 708.33",
+          "Total: 4250.00",
+          "Saved: AP-000912"
+        ],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 8,
+      "t_start": 80.0,
+      "t_end": 83.0,
+      "duration": 3.0,
+      "frame_start": 80,
+      "frame_end": 82,
+      "label": {
+        "application": "Mail",
+        "action": "select invoice email",
+        "object": "INV-20481",
+        "data_fields": [
+          "Invoice INV-20481 - 4,250.00 GBP"
+        ],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 9,
+      "t_start": 83.0,
+      "t_end": 85.0,
+      "duration": 2.0,
+      "frame_start": 83,
+      "frame_end": 84,
+      "label": {
+        "application": "Mail",
+        "action": "click Reply",
+        "object": "INV-20481",
+        "data_fields": [],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 10,
+      "t_start": 85.0,
+      "t_end": 91.0,
+      "duration": 6.0,
+      "frame_start": 85,
+      "frame_end": 90,
+      "label": {
+        "application": "Mail",
+        "action": "send approval reply",
+        "object": "Invoice INV-20481",
+        "data_fields": [
+          "Invoice INV-20481 approved for payment. Ref AP-00"
+        ],
+        "confidence": 0.95
+      },
+      "label_error": null
+    },
+    {
+      "index": 11,
+      "t_start": 91.0,
+      "t_end": 95.0,
+      "duration": 4.0,
+      "frame_start": 91,
+      "frame_end": 94,
+      "label": {
+        "application": "Mail",
+        "action": "view approval confirmation",
+        "object": "Invoice INV-20481",
+        "data_fields": [
+          "INV-20481",
+          "4,250.00 GBP",
+          "Invoice INV-20481 approved for payment."
+        ],
+        "confidence": 0.9
+      },
+      "label_error": null
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "n1",
+        "application": "Mail",
+        "action": "select invoice email",
+        "object": "INV-20481",
+        "visits": 2,
+        "total_duration": 9.0,
+        "step_indexes": [
+          0,
+          1,
+          8
+        ],
+        "avg_duration": 4.5,
+        "share": 0.0947,
+        "is_wait": false
+      },
+      {
+        "id": "n2",
+        "application": "Mail",
+        "action": "open attachment",
+        "object": "invoice-20481.pdf",
+        "visits": 1,
+        "total_duration": 6.0,
+        "step_indexes": [
+          2
+        ],
+        "avg_duration": 6.0,
+        "share": 0.0632,
+        "is_wait": false
+      },
+      {
+        "id": "n3",
+        "application": "PDF Viewer",
+        "action": "read invoice PDF",
+        "object": "INV-20481",
+        "visits": 1,
+        "total_duration": 8.0,
+        "step_indexes": [
+          3
+        ],
+        "avg_duration": 8.0,
+        "share": 0.0842,
+        "is_wait": false
+      },
+      {
+        "id": "n4",
+        "application": "ERP - Accounts Payable",
+        "action": "wait for invoice form",
+        "object": "invoice form",
+        "visits": 1,
+        "total_duration": 21.0,
+        "step_indexes": [
+          4
+        ],
+        "avg_duration": 21.0,
+        "share": 0.2211,
+        "is_wait": true
+      },
+      {
+        "id": "n5",
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form",
+        "object": "INV-20481",
+        "visits": 1,
+        "total_duration": 17.0,
+        "step_indexes": [
+          5
+        ],
+        "avg_duration": 17.0,
+        "share": 0.1789,
+        "is_wait": false
+      },
+      {
+        "id": "n6",
+        "application": "Sheets",
+        "action": "check PO in register",
+        "object": "PO-7731",
+        "visits": 1,
+        "total_duration": 9.0,
+        "step_indexes": [
+          6
+        ],
+        "avg_duration": 9.0,
+        "share": 0.0947,
+        "is_wait": false
+      },
+      {
+        "id": "n7",
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form and submit",
+        "object": "INV-20481",
+        "visits": 1,
+        "total_duration": 13.0,
+        "step_indexes": [
+          7
+        ],
+        "avg_duration": 13.0,
+        "share": 0.1368,
+        "is_wait": false
+      },
+      {
+        "id": "n8",
+        "application": "Mail",
+        "action": "click Reply",
+        "object": "INV-20481",
+        "visits": 1,
+        "total_duration": 2.0,
+        "step_indexes": [
+          9
+        ],
+        "avg_duration": 2.0,
+        "share": 0.0211,
+        "is_wait": false
+      },
+      {
+        "id": "n9",
+        "application": "Mail",
+        "action": "send approval reply",
+        "object": "Invoice INV-20481",
+        "visits": 1,
+        "total_duration": 6.0,
+        "step_indexes": [
+          10
+        ],
+        "avg_duration": 6.0,
+        "share": 0.0632,
+        "is_wait": false
+      },
+      {
+        "id": "n10",
+        "application": "Mail",
+        "action": "view approval confirmation",
+        "object": "Invoice INV-20481",
+        "visits": 1,
+        "total_duration": 4.0,
+        "step_indexes": [
+          11
+        ],
+        "avg_duration": 4.0,
+        "share": 0.0421,
+        "is_wait": false
+      }
+    ],
+    "edges": [
+      {
+        "source": "n1",
+        "target": "n2",
+        "count": 1
+      },
+      {
+        "source": "n2",
+        "target": "n3",
+        "count": 1
+      },
+      {
+        "source": "n3",
+        "target": "n4",
+        "count": 1
+      },
+      {
+        "source": "n4",
+        "target": "n5",
+        "count": 1
+      },
+      {
+        "source": "n5",
+        "target": "n6",
+        "count": 1
+      },
+      {
+        "source": "n6",
+        "target": "n7",
+        "count": 1
+      },
+      {
+        "source": "n7",
+        "target": "n1",
+        "count": 1
+      },
+      {
+        "source": "n1",
+        "target": "n8",
+        "count": 1
+      },
+      {
+        "source": "n8",
+        "target": "n9",
+        "count": 1
+      },
+      {
+        "source": "n9",
+        "target": "n10",
+        "count": 1
+      }
+    ]
+  },
+  "summary": {
+    "total_duration": 95.0,
+    "steps": 12,
+    "labelled_steps": 12,
+    "applications": [
+      "ERP - Accounts Payable",
+      "Mail",
+      "PDF Viewer",
+      "Sheets"
+    ],
+    "app_switches": 5,
+    "loops": 1,
+    "wait_duration": 21.0,
+    "longest_step_index": 4
+  },
+  "findings": [
+    {
+      "rule": "app-switch-copy",
+      "title": "Values re-keyed from PDF Viewer into ERP - Accounts Payable",
+      "detail": "1 switch from PDF Viewer to ERP - Accounts Payable with the same values on both screens (INV-20481, PO-7731). 17 s spent keying data that already exists in PDF Viewer.",
+      "severity": "high",
+      "step_indexes": [
+        3,
+        5
+      ],
+      "evidence_frames": [
+        19,
+        41
+      ],
+      "node_ids": [
+        "n3",
+        "n5"
+      ],
+      "seconds": 17.0,
+      "share": 0.1789
+    },
+    {
+      "rule": "loop",
+      "title": "Back to Mail 2 times",
+      "detail": "The user left Mail and came back 1 time; the return trip cost 15 s (16%). Screens seen again: select invoice email. Detour via PDF Viewer \u2192 ERP - Accounts Payable \u2192 Sheets \u2192 ERP - Accounts Payable.",
+      "severity": "high",
+      "step_indexes": [
+        0,
+        1,
+        2,
+        8,
+        9,
+        10,
+        11
+      ],
+      "evidence_frames": [
+        0,
+        80
+      ],
+      "node_ids": [
+        "n1"
+      ],
+      "seconds": 15.0,
+      "share": 0.1579
+    },
+    {
+      "rule": "long-step",
+      "title": "21 s waiting on ERP - Accounts Payable",
+      "detail": "Step 4 (ERP - Accounts Payable \u00b7 wait for invoice form) took 21 s, 22% of the recording. The user was waiting for the system, not working.",
+      "severity": "medium",
+      "step_indexes": [
+        4
+      ],
+      "evidence_frames": [
+        20,
+        30,
+        40
+      ],
+      "node_ids": [
+        "n4"
+      ],
+      "seconds": 21.0,
+      "share": 0.2211
+    },
+    {
+      "rule": "app-switch-copy",
+      "title": "Values cross-checked by hand between ERP - Accounts Payable and Sheets",
+      "detail": "1 switch from ERP - Accounts Payable to Sheets with the same values on both screens (Acme Supplies Ltd, PO-7731). 9 s spent checking data that already exists in ERP - Accounts Payable.",
+      "severity": "medium",
+      "step_indexes": [
+        5,
+        6
+      ],
+      "evidence_frames": [
+        57,
+        58
+      ],
+      "node_ids": [
+        "n5",
+        "n6"
+      ],
+      "seconds": 9.0,
+      "share": 0.0947
+    }
+  ],
+  "model_calls": [
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "3d8ab29c157adb7bf0c2a3e6",
+      "cached": false,
+      "latency_s": 6.098,
+      "prompt_tokens": 3947,
+      "completion_tokens": 655,
+      "cost_usd": 0.0077175,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "30883cc25f31087de100600b",
+      "cached": false,
+      "latency_s": 6.129,
+      "prompt_tokens": 3947,
+      "completion_tokens": 613,
+      "cost_usd": 0.007539,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "635f098385d181aa47d8bd5d",
+      "cached": false,
+      "latency_s": 6.789,
+      "prompt_tokens": 3947,
+      "completion_tokens": 832,
+      "cost_usd": 0.00846975,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "e3eb87c45c44ce8f24afcc36",
+      "cached": false,
+      "latency_s": 6.877,
+      "prompt_tokens": 3947,
+      "completion_tokens": 627,
+      "cost_usd": 0.0075985,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "da5148f930c5cf6b295d5d31",
+      "cached": false,
+      "latency_s": 4.082,
+      "prompt_tokens": 3947,
+      "completion_tokens": 667,
+      "cost_usd": 0.0077685,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "e62d6ec03e32533866d0d88a",
+      "cached": false,
+      "latency_s": 4.11,
+      "prompt_tokens": 3947,
+      "completion_tokens": 593,
+      "cost_usd": 0.007454,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "a8c267c691b96d585ac75b33",
+      "cached": false,
+      "latency_s": 5.831,
+      "prompt_tokens": 3947,
+      "completion_tokens": 840,
+      "cost_usd": 0.00850375,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "99c788fecf573635777c1058",
+      "cached": false,
+      "latency_s": 4.02,
+      "prompt_tokens": 3947,
+      "completion_tokens": 457,
+      "cost_usd": 0.006876,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "e0dd6bce64ebb249339c2241",
+      "cached": false,
+      "latency_s": 5.179,
+      "prompt_tokens": 3947,
+      "completion_tokens": 630,
+      "cost_usd": 0.00761125,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "3a89afcf42312289fe069f06",
+      "cached": false,
+      "latency_s": 5.274,
+      "prompt_tokens": 3947,
+      "completion_tokens": 822,
+      "cost_usd": 0.00842725,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "2aa0ef39f22a913aebbcad68",
+      "cached": false,
+      "latency_s": 4.918,
+      "prompt_tokens": 2731,
+      "completion_tokens": 765,
+      "cost_usd": 0.006665,
+      "ok": true,
+      "error": null
+    },
+    {
+      "stage": "label",
+      "model": "meta/muse-spark-1.3",
+      "cache_key": "3ef02701e8c29ecfd315b30c",
+      "cached": false,
+      "latency_s": 9.609,
+      "prompt_tokens": 3947,
+      "completion_tokens": 2309,
+      "cost_usd": 0.014747,
+      "ok": true,
+      "error": null
+    }
+  ]
+}

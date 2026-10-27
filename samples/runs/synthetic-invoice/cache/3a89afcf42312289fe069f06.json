@@ -1,0 +1,1 @@
+{"action": "send approval reply", "application": "Mail", "confidence": 0.95, "data_fields": ["Invoice INV-20481 approved for payment. Ref AP-00"], "object": "Invoice INV-20481"}
