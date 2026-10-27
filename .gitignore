@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.worklens_cache/
+runs/
+node_modules/
+.next/
+*.mp4
+!samples/*.mp4
+*.egg-info/

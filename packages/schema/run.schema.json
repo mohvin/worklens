@@ -1,0 +1,478 @@
+{
+  "$defs": {
+    "Boundary": {
+      "description": "A change of screen state that starts a new step.",
+      "properties": {
+        "index": {
+          "title": "Index",
+          "type": "integer"
+        },
+        "t": {
+          "title": "T",
+          "type": "number"
+        },
+        "frame_before": {
+          "description": "Index of the last frame of the previous state",
+          "title": "Frame Before",
+          "type": "integer"
+        },
+        "frame_after": {
+          "description": "Index of the first frame of the new state",
+          "title": "Frame After",
+          "type": "integer"
+        },
+        "score": {
+          "description": "How different the two frames are, 0..1",
+          "title": "Score",
+          "type": "number"
+        },
+        "method": {
+          "default": "pixel-diff",
+          "enum": [
+            "pixel-diff",
+            "sam-3.1"
+          ],
+          "title": "Method",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "t",
+        "frame_before",
+        "frame_after",
+        "score"
+      ],
+      "title": "Boundary",
+      "type": "object"
+    },
+    "Edge": {
+      "properties": {
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "count"
+      ],
+      "title": "Edge",
+      "type": "object"
+    },
+    "Finding": {
+      "properties": {
+        "rule": {
+          "enum": [
+            "long-step",
+            "loop",
+            "app-switch-copy"
+          ],
+          "title": "Rule",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "step_indexes": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Step Indexes",
+          "type": "array"
+        },
+        "evidence_frames": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Evidence Frames",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule",
+        "title",
+        "detail",
+        "severity",
+        "step_indexes",
+        "evidence_frames"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "Frame": {
+      "properties": {
+        "index": {
+          "description": "Position in the sampled sequence, 0-based",
+          "title": "Index",
+          "type": "integer"
+        },
+        "t": {
+          "description": "Seconds from the start of the recording",
+          "title": "T",
+          "type": "number"
+        },
+        "path": {
+          "description": "Path of the JPEG relative to the run directory",
+          "title": "Path",
+          "type": "string"
+        },
+        "phash": {
+          "description": "Perceptual hash, hex",
+          "title": "Phash",
+          "type": "string"
+        },
+        "kept": {
+          "default": true,
+          "description": "False when dropped as a near-duplicate",
+          "title": "Kept",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "index",
+        "t",
+        "path",
+        "phash"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
+    "Graph": {
+      "properties": {
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/Node"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/Edge"
+          },
+          "title": "Edges",
+          "type": "array"
+        }
+      },
+      "title": "Graph",
+      "type": "object"
+    },
+    "ModelCall": {
+      "description": "One request to a Meta model, for the cost log and the replay cache.",
+      "properties": {
+        "stage": {
+          "enum": [
+            "label",
+            "segment"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "cache_key": {
+          "title": "Cache Key",
+          "type": "string"
+        },
+        "cached": {
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "latency_s": {
+          "title": "Latency S",
+          "type": "number"
+        },
+        "prompt_tokens": {
+          "default": 0,
+          "title": "Prompt Tokens",
+          "type": "integer"
+        },
+        "completion_tokens": {
+          "default": 0,
+          "title": "Completion Tokens",
+          "type": "integer"
+        },
+        "cost_usd": {
+          "default": 0.0,
+          "title": "Cost Usd",
+          "type": "number"
+        },
+        "ok": {
+          "default": true,
+          "title": "Ok",
+          "type": "boolean"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        }
+      },
+      "required": [
+        "stage",
+        "model",
+        "cache_key",
+        "cached",
+        "latency_s"
+      ],
+      "title": "ModelCall",
+      "type": "object"
+    },
+    "Node": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "application": {
+          "title": "Application",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "object": {
+          "title": "Object",
+          "type": "string"
+        },
+        "visits": {
+          "title": "Visits",
+          "type": "integer"
+        },
+        "total_duration": {
+          "title": "Total Duration",
+          "type": "number"
+        },
+        "step_indexes": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Step Indexes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "application",
+        "action",
+        "object",
+        "visits",
+        "total_duration",
+        "step_indexes"
+      ],
+      "title": "Node",
+      "type": "object"
+    },
+    "Step": {
+      "properties": {
+        "index": {
+          "title": "Index",
+          "type": "integer"
+        },
+        "t_start": {
+          "title": "T Start",
+          "type": "number"
+        },
+        "t_end": {
+          "title": "T End",
+          "type": "number"
+        },
+        "duration": {
+          "title": "Duration",
+          "type": "number"
+        },
+        "frame_start": {
+          "title": "Frame Start",
+          "type": "integer"
+        },
+        "frame_end": {
+          "title": "Frame End",
+          "type": "integer"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StepLabel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "label_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label Error"
+        }
+      },
+      "required": [
+        "index",
+        "t_start",
+        "t_end",
+        "duration",
+        "frame_start",
+        "frame_end"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "StepLabel": {
+      "description": "What Muse Spark says happened in one step.",
+      "properties": {
+        "application": {
+          "title": "Application",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "object": {
+          "title": "Object",
+          "type": "string"
+        },
+        "data_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Data Fields",
+          "type": "array"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "application",
+        "action",
+        "object",
+        "confidence"
+      ],
+      "title": "StepLabel",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "source": {
+      "description": "Recording file name",
+      "title": "Source",
+      "type": "string"
+    },
+    "duration": {
+      "default": 0.0,
+      "title": "Duration",
+      "type": "number"
+    },
+    "fps_sampled": {
+      "default": 1.0,
+      "title": "Fps Sampled",
+      "type": "number"
+    },
+    "status": {
+      "default": "created",
+      "enum": [
+        "created",
+        "sampled",
+        "detected",
+        "labelled",
+        "built",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "frames": {
+      "items": {
+        "$ref": "#/$defs/Frame"
+      },
+      "title": "Frames",
+      "type": "array"
+    },
+    "boundaries": {
+      "items": {
+        "$ref": "#/$defs/Boundary"
+      },
+      "title": "Boundaries",
+      "type": "array"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "graph": {
+      "$ref": "#/$defs/Graph"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "model_calls": {
+      "items": {
+        "$ref": "#/$defs/ModelCall"
+      },
+      "title": "Model Calls",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "source"
+  ],
+  "title": "Run",
+  "type": "object"
+}
