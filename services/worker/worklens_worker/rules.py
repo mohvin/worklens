@@ -212,7 +212,14 @@ def rule_app_switch_copy(run: Run) -> list[Finding]:
                 target = g
                 break
         sb = target[0]
-        shared = _values(sa) & _values(sb)
+        # values the target application already showed before this switch were
+        # not carried over now (a detour and back is not a re-keying)
+        seen_before: set[str] = set()
+        for g in groups[: i + 1]:
+            if g[0].label and normalise(g[0].label.application) == normalise(sb.label.application):
+                for st in g:
+                    seen_before |= _values(st)
+        shared = (_values(sa) & _values(sb)) - seen_before
         mentions = bool(COPY_RE.search(sb.label.action) or COPY_RE.search(sa.label.action))
         if not shared and not mentions:
             continue

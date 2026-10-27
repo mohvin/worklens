@@ -6,7 +6,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 .worklens_cache/
-runs/
+/runs/
 node_modules/
 .next/
 *.mp4

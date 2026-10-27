@@ -124,6 +124,16 @@ def test_loop_inside_one_application_is_costed_on_the_repeated_screen():
     assert "look up PO" in inner.detail
 
 
+def test_detour_and_back_is_not_a_re_keying():
+    run = labelled_run()
+    # after the Sheets check the user continues the same ERP form, with the same values on screen
+    run.steps[7].label.data_fields = ["Supplier: Acme Supplies", "PO: PO-7731", "Due date: 2026-11-14"]
+    run = run_rules(build(run))
+    titles = [f.title for f in run.findings if f.rule == "app-switch-copy"]
+    assert "Values re-keyed from PDF Viewer into ERP - Accounts Payable" in titles
+    assert not any(t.startswith("Values re-keyed from Sheets") for t in titles)
+
+
 def test_json_export_roundtrips(built):
     again = Run.model_validate_json(to_json(built))
     assert again.graph == built.graph and again.findings == built.findings

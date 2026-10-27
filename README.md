@@ -102,12 +102,20 @@ worklens export <run_id> --format bpmn    # BPMN 2.0 XML with diagram layout; op
 worklens export <run_id> --format json    # the Run, validated by packages/schema/run.schema.json
 ```
 
+### The findings view
+
+```bash
+cd apps/web && npm install && npm run dev     # http://localhost:3000, reads ./runs
+```
+
+One page per run: the recording as a timeline strip (colour = application, hatched = waiting, braces = findings), the process map with the loop drawn as a back-edge, the frames behind any box you click, and the top 3 findings with their evidence frames. Download BPMN / JSON from the header.
+
 Tests: `cd services/worker && pytest` (14 tests, all offline: the graph, rules and export tests use the cached labels in `tests/fixtures`).
 
 ## Layout
 
 ```
-apps/web/            Next.js UI (next)
+apps/web/            Next.js 15 findings view: timeline, process map, evidence frames, findings, export
 services/worker/     pipeline: sample -> detect -> label -> build (graph.py) -> rules (rules.py) -> export (export.py)
 packages/schema/     run.schema.json, the contract for the export (worklens schema)
 samples/             synthetic recording generator; no real data
