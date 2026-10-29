@@ -1,0 +1,1 @@
+{"action": "click Reply", "application": "Mail", "confidence": 0.95, "data_fields": ["From: accounts@acme-supplies.example", "Subject: Invoice INV-20481 - 4,250.00 GBP", "invoice-20481.pdf (84 KB)"], "object": "Invoice INV-20481"}

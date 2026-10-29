@@ -3,7 +3,7 @@
   <bpmn:process id="worklens_synthetic-invoice" name="synthetic-invoice.mp4" isExecutable="false">
     <bpmn:startEvent id="start" name="Start" />
     <bpmn:task id="n1" name="Mail: select invoice email (9 s, 2x)">
-      <bpmn:documentation>2 visit(s), 9.0 s total, 9% of the recording. Object: INV-20481</bpmn:documentation>
+      <bpmn:documentation>2 visit(s), 9.0 s total, 9% of the recording. Object: Invoice INV-20481</bpmn:documentation>
     </bpmn:task>
     <bpmn:task id="n2" name="Mail: open attachment (6 s)">
       <bpmn:documentation>1 visit(s), 6.0 s total, 6% of the recording. Object: invoice-20481.pdf</bpmn:documentation>
@@ -11,7 +11,7 @@
     <bpmn:task id="n3" name="PDF Viewer: read invoice PDF (8 s)">
       <bpmn:documentation>1 visit(s), 8.0 s total, 8% of the recording. Object: INV-20481</bpmn:documentation>
     </bpmn:task>
-    <bpmn:task id="n4" name="ERP - Accounts Payable: wait for invoice form (21 s)">
+    <bpmn:task id="n4" name="ERP - Accounts Payable: wait for invoice form to load (21 s)">
       <bpmn:documentation>1 visit(s), 21.0 s total, 22% of the recording. Object: invoice form</bpmn:documentation>
     </bpmn:task>
     <bpmn:task id="n5" name="ERP - Accounts Payable: fill invoice form (17 s)">
@@ -24,12 +24,12 @@
       <bpmn:documentation>1 visit(s), 13.0 s total, 14% of the recording. Object: INV-20481</bpmn:documentation>
     </bpmn:task>
     <bpmn:task id="n8" name="Mail: click Reply (2 s)">
-      <bpmn:documentation>1 visit(s), 2.0 s total, 2% of the recording. Object: INV-20481</bpmn:documentation>
+      <bpmn:documentation>1 visit(s), 2.0 s total, 2% of the recording. Object: Invoice INV-20481</bpmn:documentation>
     </bpmn:task>
     <bpmn:task id="n9" name="Mail: send approval reply (6 s)">
-      <bpmn:documentation>1 visit(s), 6.0 s total, 6% of the recording. Object: Invoice INV-20481</bpmn:documentation>
+      <bpmn:documentation>1 visit(s), 6.0 s total, 6% of the recording. Object: INV-20481</bpmn:documentation>
     </bpmn:task>
-    <bpmn:task id="n10" name="Mail: view approval confirmation (4 s)">
+    <bpmn:task id="n10" name="Mail: view approval reply (4 s)">
       <bpmn:documentation>1 visit(s), 4.0 s total, 4% of the recording. Object: Invoice INV-20481</bpmn:documentation>
     </bpmn:task>
     <bpmn:endEvent id="end" name="End" />

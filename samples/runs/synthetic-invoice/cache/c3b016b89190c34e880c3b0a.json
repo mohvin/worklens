@@ -1,0 +1,1 @@
+{"action": "select invoice email", "application": "Mail", "confidence": 0.95, "data_fields": ["Acme Supplies", "Invoice INV-20481", "4,250.00 GBP"], "object": "Invoice INV-20481"}

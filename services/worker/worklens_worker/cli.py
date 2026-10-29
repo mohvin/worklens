@@ -88,10 +88,11 @@ def run(
         r = label(r, run_dir, client, workers=workers)
         store.save(r)
         ok = sum(1 for s in r.steps if s.label)
-        fresh = [c for c in r.model_calls if not c.cached]
+        lab = [c for c in r.model_calls if c.stage == "label"]
+        fresh = [c for c in lab if not c.cached]
         typer.echo(
             f"labelled {ok}/{len(r.steps)} steps with {client.cfg.model}: "
-            f"{len(fresh)} API calls, {len(r.model_calls) - len(fresh)} cached, ${r.total_cost_usd:.4f}"
+            f"{len(fresh)} API calls, {len(lab) - len(fresh)} cached, ${r.total_cost_usd:.4f}"
         )
 
     r = run_rules(build(r))
