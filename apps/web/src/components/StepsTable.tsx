@@ -3,10 +3,11 @@
 import type { Run } from "@/lib/types";
 import { fmtClock, fmtSeconds } from "@/lib/types";
 import { nodeOfStep } from "@/lib/view";
+import { nodeKey } from "@/lib/model";
 
-interface Props { run: Run; colors: Map<string, string>; selectedId: string | null; onSelect: (id: string | null) => void }
+interface Props { run: Run; rec: number; colors: Map<string, string>; selectedKey: string | null; onSelect: (key: string | null) => void }
 
-export default function StepsTable({ run, colors, selectedId, onSelect }: Props) {
+export default function StepsTable({ run, rec, colors, selectedKey, onSelect }: Props) {
   return (
     <table className="table">
       <thead>
@@ -16,7 +17,7 @@ export default function StepsTable({ run, colors, selectedId, onSelect }: Props)
         {run.steps.map((s) => {
           const node = nodeOfStep(run, s.index); const app = s.label?.application ?? "Unknown";
           return (
-            <tr key={s.index} className={node && node.id === selectedId ? "selected" : undefined} onClick={() => onSelect(node?.id ?? null)}>
+            <tr key={s.index} className={node && nodeKey(rec, node.id) === selectedKey ? "selected" : undefined} onClick={() => onSelect(node ? nodeKey(rec, node.id) : null)}>
               <td className="num">{s.index}</td>
               <td className="num">{fmtClock(s.t_start)}</td>
               <td className="num">{fmtSeconds(s.duration)}</td>

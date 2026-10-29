@@ -1,8 +1,8 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { Run } from "./types";
+import type { Process, Run } from "./types";
 import { SAMPLES } from "@/generated/samples";
-import { getRunRow, listRunRows, supabaseConfigured } from "./supabase";
+import { getProcessRow, getRunRow, listProcessRows, listRunRows, listRunsOfProcess, supabaseConfigured, type ProcessRow } from "./supabase";
 
 // Three sources, in this order: replay runs bundled from samples/runs (always
 // present, also on Vercel), runs uploaded through the site (Supabase row +
@@ -22,9 +22,10 @@ export interface LoadedRun {
   frameBase: string;           // URL prefix for frames
   frames: number[] | null;     // frame indexes that exist, or null when all do
   processedAt?: string;        // hosted runs: when the pipeline finished
+  process?: { id: string; name: string; role: string | null } | null;   // hosted runs that belong to a process
 }
 
-export interface RunListing { id: string; source: string; duration: number; status: string; findings: number; mtime: number; kind: Source }
+export interface RunListing { id: string; source: string; duration: number; status: string; findings: number; mtime: number; kind: Source; role?: string | null; processId?: string | null }
 
 const ID_RE = /^[a-z0-9_-]+$/i;
 
@@ -34,7 +35,7 @@ export async function listRuns(): Promise<RunListing[]> {
   }));
   for (const row of await listRunRows()) {
     const p = row.progress as { steps?: number; findings?: number };
-    out.push({ id: row.id, source: row.source, duration: 0, status: row.status, findings: p.findings ?? 0, mtime: Date.parse(row.updated_at), kind: "hosted" });
+    out.push({ id: row.id, source: row.source, duration: 0, status: row.status, findings: p.findings ?? 0, mtime: Date.parse(row.updated_at), kind: "hosted", role: row.role ?? null, processId: row.process_id ?? null });
   }
   let entries: string[] = [];
   try { entries = await fs.readdir(runsDir()); } catch { entries = []; }
@@ -64,8 +65,13 @@ export async function getRun(id: string): Promise<LoadedRun | null> {
     const row = await getRunRow(id);
     if (row) {
       const frames = (row.progress as { frames_available?: number[] }).frames_available ?? null;
+      let process: LoadedRun["process"] = null;
+      if (row.process_id) {
+        const pr = await getProcessRow(row.process_id, "id,name");
+        if (pr) process = { id: pr.id, name: pr.name, role: row.role ?? null };
+      }
       if (row.status === "built" && row.run_json) {
-        return { run: row.run_json as Run, pending: null, source: "hosted", frameBase: `/api/runs/${id}/frames`, frames, processedAt: new Date(row.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) };
+        return { run: row.run_json as Run, pending: null, source: "hosted", frameBase: `/api/runs/${id}/frames`, frames, processedAt: new Date(row.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }), process };
       }
       return {
         run: null,
@@ -80,4 +86,34 @@ export async function getRun(id: string): Promise<LoadedRun | null> {
 export async function runFile(id: string, rel: string): Promise<Buffer | null> {
   if (!ID_RE.test(id) || rel.includes("..")) return null;
   try { return await fs.readFile(path.join(runsDir(), id, rel)); } catch { return null; }
+}
+
+// ---- processes: several hosted runs, one per role ----
+
+export interface ProcessRec { id: string; role: string; source: string; status: string; error: string | null; run: Run | null; frameBase: string; frames: number[] | null }
+export interface LoadedProcess { row: ProcessRow; proc: Process | null; recs: ProcessRec[] }
+
+export async function getProcess(id: string): Promise<LoadedProcess | null> {
+  if (!ID_RE.test(id) || !supabaseConfigured()) return null;
+  const row = await getProcessRow(id);
+  if (!row) return null;
+  const rows = await listRunsOfProcess(id);
+  const recs: ProcessRec[] = rows.map((r) => ({
+    id: r.id, role: r.role ?? "", source: r.source, status: r.status, error: r.error,
+    run: r.status === "built" && r.run_json ? (r.run_json as Run) : null,
+    frameBase: `/api/runs/${r.id}/frames`, frames: (r.progress as { frames_available?: number[] }).frames_available ?? null,
+  }));
+  return { row, proc: row.status === "built" && row.process_json ? (row.process_json as Process) : null, recs };
+}
+
+export interface ProcessListing { id: string; name: string; status: string; mtime: number; recs: { id: string; role: string; source: string; status: string }[] }
+
+export async function listProcesses(): Promise<ProcessListing[]> {
+  const rows = await listProcessRows();
+  if (rows.length === 0) return [];
+  const runs = await listRunRows(200);
+  return rows.map((p) => ({
+    id: p.id, name: p.name, status: p.status, mtime: Date.parse(p.updated_at),
+    recs: runs.filter((r) => r.process_id === p.id).sort((a, b) => (a.position ?? 0) - (b.position ?? 0) || a.created_at.localeCompare(b.created_at)).map((r) => ({ id: r.id, role: r.role ?? "", source: r.source, status: r.status })),
+  }));
 }

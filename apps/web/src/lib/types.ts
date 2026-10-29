@@ -44,3 +44,21 @@ export const fmtClock = (s: number): string => {
   return `${m}:${String(r).padStart(2, "0")}`;
 };
 export const fmtPct = (x: number): string => `${Math.round(x * 100)}%`;
+
+// ---- a process: several recordings, one per role, joined by handoffs ----
+export interface Recording { index: number; run_id: string; role: string; source: string; duration: number; steps: number; findings: number }
+export interface Ref { rec: number; step: number; node_id: string }
+export interface FrameRef { rec: number; frame: number }
+export interface Handoff { from_ref: Ref; to_ref: Ref; via: string; object: string; matched: boolean }
+export interface ProcessFinding {
+  rule: "cross-check" | "cross-rekey" | "handoff-detour"; title: string; detail: string; severity: Severity;
+  refs: Ref[]; evidence: FrameRef[]; seconds: number; share: number;
+}
+export interface ProcessSummary {
+  total_duration: number; wait_duration: number; steps: number; applications: string[]; roles: string[];
+  app_switches: number; loops: number; handoffs: number; run_findings: number;
+}
+export interface Process {
+  id: string; name: string; status: "created" | "building" | "built" | "failed";
+  recordings: Recording[]; handoffs: Handoff[]; findings: ProcessFinding[]; summary: ProcessSummary;
+}
