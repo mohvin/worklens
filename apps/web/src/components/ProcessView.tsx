@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Process } from "@/lib/types";
 import { fmtClock, fmtSeconds, fmtPct } from "@/lib/types";
 import { buildModel, laneColors, type MapRecording } from "@/lib/model";
-import { processFindings } from "@/lib/findings";
+import { flaggedSeconds, processFindings } from "@/lib/findings";
 import type { ProcessRec } from "@/lib/runs";
 import Timeline, { type Selection } from "./Timeline";
 import ProcessMap from "./ProcessMap";
@@ -31,7 +31,7 @@ export default function ProcessView({ proc, recs, processedAt }: Props) {
   const colors = useMemo(() => laneColors(model), [model]);
   const findings = useMemo(() => processFindings(proc, model), [proc, model]);
   const total = model.total;
-  const flagged = findings.reduce((a, f) => a + f.seconds, 0);
+  const flagged = flaggedSeconds(findings, model);
   const cross = findings.filter((f) => f.cross);
   const finding = sel.findingIndex === null ? null : findings[sel.findingIndex];
   const hotKeys = new Set(finding ? finding.nodeKeys : []);
@@ -67,7 +67,7 @@ export default function ProcessView({ proc, recs, processedAt }: Props) {
 
       <section className="kpis" aria-label="Process summary">
         <div className="kpi"><div className="l">Recordings</div><div className="v">{proc.recordings.length}</div><div className="c">{proc.summary.roles.join(" → ")} · {fmtClock(total)} of work</div></div>
-        <div className={`kpi${flagged > 0 ? " alert" : ""}`}><div className="l">Time flagged</div><div className="v">{fmtSeconds(flagged)}<small>{fmtPct(flagged / total)}</small></div><div className="c">{findings.length} finding{findings.length === 1 ? "" : "s"}, {findings.filter((f) => f.severity === "high").length} high · {cross.length} across roles</div></div>
+        <div className={`kpi${flagged > 0 ? " alert" : ""}`}><div className="l">Time flagged</div><div className="v">{fmtSeconds(flagged)}<small>{fmtPct(flagged / total)}</small></div><div className="c">{findings.length} finding{findings.length === 1 ? "" : "s"}, {findings.filter((f) => f.severity === "high").length} high · {cross.length} across roles · overlaps counted once</div></div>
         <div className="kpi"><div className="l">Waiting</div><div className="v">{fmtSeconds(proc.summary.wait_duration)}<small>{fmtPct(proc.summary.wait_duration / total)}</small></div><div className="c">system load time, not work</div></div>
         <div className="kpi"><div className="l">Handoffs</div><div className="v">{proc.summary.handoffs}</div><div className="c">{proc.handoffs.length ? `via ${[...new Set(proc.handoffs.map((h) => h.via))].join(", ")}${proc.handoffs.every((h) => h.matched) ? "" : " · some by order only"}` : "single role"}</div></div>
         <div className="kpi"><div className="l">Loops</div><div className="v">{proc.summary.loops}</div><div className="c">{proc.summary.loops ? "a screen visited again after leaving it" : "no screen revisited"}</div></div>

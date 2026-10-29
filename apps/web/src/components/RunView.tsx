@@ -6,7 +6,7 @@ import type { Run } from "@/lib/types";
 import { fmtClock, fmtSeconds, fmtPct } from "@/lib/types";
 import { type FrameSource } from "@/lib/view";
 import { buildModel, laneColors } from "@/lib/model";
-import { runFindings } from "@/lib/findings";
+import { flaggedSeconds, runFindings } from "@/lib/findings";
 import Timeline, { type Selection } from "./Timeline";
 import ProcessMap from "./ProcessMap";
 import StepsTable from "./StepsTable";
@@ -29,7 +29,7 @@ export default function RunView({ run, frameBase, frames, sample, processedAt, c
   const colors = useMemo(() => laneColors(model), [model]);
   const findings = useMemo(() => runFindings(run, 0, model.total), [run, model]);
   const total = run.summary.total_duration || run.duration;
-  const lost = run.findings.reduce((a, f) => a + f.seconds, 0);
+  const lost = flaggedSeconds(findings, model);
   const labelCalls = run.model_calls.filter((c) => c.stage === "label");
   const segCalls = run.model_calls.filter((c) => c.stage === "segment");
   const cost = costUsd ?? run.model_calls.reduce((a, c) => a + c.cost_usd, 0);
@@ -68,7 +68,7 @@ export default function RunView({ run, frameBase, frames, sample, processedAt, c
 
       <section className="kpis" aria-label="Run summary">
         <div className="kpi"><div className="l">Recorded</div><div className="v">{fmtClock(total)}</div><div className="c">{run.steps.length} steps · {kept} of {run.frames.length} frames kept</div></div>
-        <div className={`kpi${lost > 0 ? " alert" : ""}`}><div className="l">Time flagged</div><div className="v">{fmtSeconds(lost)}<small>{fmtPct(lost / total)}</small></div><div className="c">{run.findings.length} finding{run.findings.length === 1 ? "" : "s"}{run.findings.length ? `, ${run.findings.filter((f) => f.severity === "high").length} high` : ""}</div></div>
+        <div className={`kpi${lost > 0 ? " alert" : ""}`}><div className="l">Time flagged</div><div className="v">{fmtSeconds(lost)}<small>{fmtPct(lost / total)}</small></div><div className="c">{run.findings.length} finding{run.findings.length === 1 ? "" : "s"}{run.findings.length ? `, ${run.findings.filter((f) => f.severity === "high").length} high · overlaps counted once` : ""}</div></div>
         <div className="kpi"><div className="l">Waiting</div><div className="v">{fmtSeconds(run.summary.wait_duration)}<small>{fmtPct(run.summary.wait_duration / total)}</small></div><div className="c">system load time, not work</div></div>
         <div className="kpi"><div className="l">App switches</div><div className="v">{run.summary.app_switches}</div><div className="c">across {run.summary.applications.length} applications</div></div>
         <div className="kpi"><div className="l">Loops</div><div className="v">{run.summary.loops}</div><div className="c">{run.summary.loops ? "a screen visited again after leaving it" : "no screen revisited"}</div></div>
