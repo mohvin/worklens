@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WorkLens Recorder</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="mark"><i></i>WorkLens</div>
+  <div class="ws" id="ws">Demo workspace</div>
+  <span class="chip rec" id="chip-rec" hidden><i></i>REC</span>
+  <span class="chip paused" id="chip-paused" hidden>Paused</span>
+  <span class="chip info" id="chip-send" hidden>Sending</span>
+  <span class="chip ok" id="chip-done" hidden>✓ Sent</span>
+  <span class="chip fail" id="chip-err" hidden>Error</span>
+</header>
+
+<!-- 1 · Ready -->
+<main class="screen" id="s-idle" hidden>
+  <div class="head"><h1>Record a task</h1><p>Work as you normally do. Stop when the task is done.</p></div>
+  <label class="field"><span>Who is recording</span><input id="role" type="text" placeholder="e.g. AP clerk, Approver" autocomplete="off"></label>
+  <label class="field"><span>Part of a process</span>
+    <div class="selwrap"><select id="process"><option value="">Standalone recording</option><option value="new">New process…</option></select></div>
+    <span class="help" id="process-help">Upload the first role, then the next one into the same process; the map merges once all are built.</span>
+  </label>
+  <label class="field" id="newname-field" hidden><span>Process name</span><input id="newname" type="text" placeholder="e.g. Invoice approval" autocomplete="off"></label>
+  <div class="card list">
+    <div class="eyebrow">What gets captured</div>
+    <div class="row"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8"/></svg><span>Chrome asks you to pick the screen, a window or this tab each time. Desktop apps are included when you pick the screen.</span></div>
+    <div class="row"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 9v11"/></svg><span>Tab switches are logged (site and title) so each step is tied to the right application.</span></div>
+    <div class="row"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Nothing is read by a person. The file goes only to your workspace.</span></div>
+  </div>
+  <div class="grow"></div>
+  <p class="err" id="idle-err" hidden></p>
+  <button class="btn primary big" id="btn-start"><i class="dot"></i>Start recording</button>
+  <div class="foot">Shortcut Alt+Shift+R · <a id="link-open" href="#" target="_blank" rel="noopener">Open WorkLens</a> · <a href="#" id="link-settings">Workspace</a></div>
+  <div class="settings" id="settings" hidden>
+    <label class="field"><span>WorkLens address</span><input id="base" type="url" placeholder="https://worklens-iota.vercel.app"></label>
+    <button class="btn sm" id="btn-base">Save</button>
+  </div>
+</main>
+
+<!-- 2 · Recording / paused -->
+<main class="screen" id="s-rec" hidden>
+  <div class="timer"><div class="clock" id="clock">0:00</div><div class="who" id="who"></div></div>
+  <div class="card list" id="tablog"></div>
+  <div class="kpis"><div><div class="l">Apps</div><div class="v" id="k-apps">0</div></div><div><div class="l">Switches</div><div class="v" id="k-sw">0</div></div><div><div class="l">Size</div><div class="v" id="k-size">0 MB</div></div></div>
+  <div class="row muted"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><span>Pause before anything personal; paused time is cut from the recording.</span></div>
+  <div class="grow"></div>
+  <div class="actions">
+    <button class="btn square" id="btn-pause" aria-label="Pause recording"><svg aria-hidden="true" viewBox="0 0 24 24" class="fill"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
+    <button class="btn square" id="btn-resume" aria-label="Resume recording" hidden><svg aria-hidden="true" viewBox="0 0 24 24" class="fill"><path d="M7 5l12 7-12 7z"/></svg></button>
+    <button class="btn danger big" id="btn-stop"><i class="sq"></i>Stop and send to WorkLens</button>
+  </div>
+  <button class="btn ghost" id="btn-discard">Discard this recording</button>
+</main>
+
+<!-- 3 · Uploading -->
+<main class="screen" id="s-up" hidden>
+  <div class="head"><h1>Sending to WorkLens</h1><p>You can close this window. The upload continues in the background and the badge shows when it is done.</p></div>
+  <div class="card prog">
+    <div class="between"><b id="up-name"></b><span class="mono" id="up-pct">0%</span></div>
+    <div class="bar"><i id="up-bar"></i></div>
+    <div class="between muted"><span id="up-bytes"></span><span id="up-left"></span></div>
+  </div>
+  <div class="card list stages">
+    <div class="row" id="st-rec"><i></i><span id="st-rec-t">Recorded</span></div>
+    <div class="row" id="st-log"><i></i><span id="st-log-t">Tab log attached</span></div>
+    <div class="row now" id="st-up"><i></i><span>Uploading the recording</span></div>
+    <div class="row todo" id="st-start"><i></i><span>Starting the pipeline</span></div>
+    <div class="row todo"><i></i><span>Process map ready in a few minutes</span></div>
+  </div>
+  <div class="grow"></div>
+  <button class="btn" id="btn-cancel">Cancel upload</button>
+</main>
+
+<!-- 4 · Done -->
+<main class="screen" id="s-done" hidden>
+  <div class="head"><h1>Run started</h1><p>WorkLens is building the process map. It takes about 3 minutes for an 8-minute recording.</p></div>
+  <div class="card">
+    <div class="runrow"><div class="thumb"><i class="a"></i><i></i><i></i><i></i></div><div class="min0"><b id="done-name"></b><div class="mono muted" id="done-meta"></div></div></div>
+    <dl class="kv"><dt>Role</dt><dd id="done-role"></dd><dt>Process</dt><dd id="done-process"></dd><dt>Status</dt><dd class="info">Queued for the worker</dd></dl>
+  </div>
+  <a class="btn primary big" id="done-open" href="#" target="_blank" rel="noopener">Open in WorkLens <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></a>
+  <div class="card soft" id="done-next" hidden>
+    <b>Next: the next role records into the same process</b>
+    <p>WorkLens joins the recordings at the handoff and reports what is checked twice or re-keyed across roles.</p>
+    <button class="btn sm outline" id="btn-copy">Copy process link</button>
+  </div>
+  <div class="grow"></div>
+  <button class="btn" id="btn-again">Record another task</button>
+</main>
+
+<!-- error -->
+<main class="screen" id="s-err" hidden>
+  <div class="head"><h1>Something went wrong</h1><p id="err-text"></p></div>
+  <div class="grow"></div>
+  <button class="btn primary big" id="btn-err-reset">Back</button>
+</main>
+
+<script src="popup.js"></script>
+</body>
+</html>

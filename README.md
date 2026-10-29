@@ -6,6 +6,10 @@ Process mining today needs system logs. Most work happens on screens nobody logs
 
 Built for the [Meta Global AI Developer Hackathon](https://cerebralvalley.ai/e/meta-ai-developer-hackathon), Oct 26 to Nov 4 2026, Startup track, by [PurpleAI Labs](https://purplelab.ai). All code in this repository was written during the hackathon window.
 
+## Record from the browser
+
+`apps/extension` is a Chrome extension (MV3): Record → work → Stop, and the recording goes straight into WorkLens with the role and process set. It also logs every tab switch so steps are tied to applications. See `apps/extension/README.md`.
+
 ## How it works
 
 ```
