@@ -8,23 +8,22 @@ interface Props { run: Run; colors: Map<string, string>; selectedId: string | nu
 
 export default function StepsTable({ run, colors, selectedId, onSelect }: Props) {
   return (
-    <table className="steps">
+    <table className="table">
       <thead>
-        <tr><th>#</th><th>Start</th><th>Length</th><th>Application</th><th>Action</th><th>Object</th><th>Fields seen</th></tr>
+        <tr><th className="num">#</th><th className="num">Start</th><th className="num">Length</th><th>Application</th><th>Action · confidence</th><th className="hide-sm">Object</th><th className="hide-sm">Fields seen</th></tr>
       </thead>
       <tbody>
         {run.steps.map((s) => {
-          const node = nodeOfStep(run, s.index);
-          const app = s.label?.application ?? "Unknown";
+          const node = nodeOfStep(run, s.index); const app = s.label?.application ?? "Unknown";
           return (
             <tr key={s.index} className={node && node.id === selectedId ? "selected" : undefined} onClick={() => onSelect(node?.id ?? null)}>
               <td className="num">{s.index}</td>
               <td className="num">{fmtClock(s.t_start)}</td>
               <td className="num">{fmtSeconds(s.duration)}</td>
-              <td><span style={{ color: colors.get(app) }}>●</span> {app}</td>
-              <td>{s.label ? s.label.action : <span className="err">unlabelled{s.label_error ? `: ${s.label_error}` : ""}</span>}{s.label && <span className="conf"> {s.label.confidence.toFixed(2)}</span>}</td>
-              <td>{s.label?.object}</td>
-              <td style={{ color: "var(--ink-2)" }}>{s.label?.data_fields.join(", ")}</td>
+              <td><span className="dot" style={{ background: colors.get(app) }} />{app}</td>
+              <td>{s.label ? <>{s.label.action} <span className="conf">{s.label.confidence.toFixed(2)}</span></> : <span className="err">unlabelled{s.label_error ? `: ${s.label_error}` : ""}</span>}</td>
+              <td className="hide-sm">{s.label?.object}</td>
+              <td className="hide-sm" style={{ color: "var(--text-2)" }}>{s.label?.data_fields.join(", ")}</td>
             </tr>
           );
         })}

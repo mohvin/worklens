@@ -1,13 +1,19 @@
 import { getRun, runFile } from "@/lib/runs";
+import { downloadObject } from "@/lib/supabase";
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const fmt = new URL(req.url).searchParams.get("format") ?? "json";
   const loaded = await getRun(id);
-  if (!loaded) return new Response("not found", { status: 404 });
+  if (!loaded?.run) return new Response("not found", { status: 404 });
   const base = loaded.run.source.replace(/\.[^.]+$/, "");
   if (fmt === "bpmn") {
-    if (loaded.sample) return Response.redirect(new URL(`/samples/${id}/run.bpmn`, req.url), 302);
+    if (loaded.source === "sample") return Response.redirect(new URL(`/samples/${id}/run.bpmn`, req.url), 302);
+    if (loaded.source === "hosted") {
+      const r = await downloadObject("runs", `${id}/run.bpmn`);
+      if (!r.ok) return new Response("not found", { status: 404 });
+      return new Response(r.body, { headers: { "content-type": "application/xml", "content-disposition": `attachment; filename="${base}.bpmn"` } });
+    }
     const xml = await runFile(id, "run.bpmn");
     if (!xml) return new Response("run.bpmn not built yet: run `worklens rebuild " + id + "`", { status: 404 });
     return new Response(new Uint8Array(xml), { headers: { "content-type": "application/xml", "content-disposition": `attachment; filename="${base}.bpmn"` } });

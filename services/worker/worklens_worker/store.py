@@ -19,8 +19,8 @@ class RunStore:
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def new_run(self, source: Path) -> tuple[Run, Path]:
-        run_id = secrets.token_hex(4)
+    def new_run(self, source: Path, run_id: str | None = None) -> tuple[Run, Path]:
+        run_id = run_id or secrets.token_hex(4)
         run_dir = self.root / run_id
         (run_dir / "frames").mkdir(parents=True)
         (run_dir / "cache").mkdir()

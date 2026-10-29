@@ -11,21 +11,16 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 from pathlib import Path
 
 import typer
 from dotenv import load_dotenv
 
-from .detect import SamChangeSegmenter, detect
 from .export import to_bpmn, to_json
 from .graph import build
-from .label import label
-from .llm import LLMClient, LLMConfig
 from .models import Run
+from .pipeline import run_pipeline, seed_cache
 from .rules import run_rules
-from .sam import SamClient
-from .sample import kept_frames, sample
 from .store import RunStore
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
@@ -57,50 +52,10 @@ def run(
     r, run_dir = store.new_run(video)
     typer.echo(f"run {r.id} -> {run_dir}")
     if cache:
-        n = 0
-        for f in cache.glob("*.json"):
-            shutil.copy(f, run_dir / "cache" / f.name)
-            n += 1
-        typer.echo(f"seeded cache with {n} responses from {cache}")
-
-    r = sample(r, run_dir, video, fps=fps)
-    store.save(r)
-    typer.echo(f"sampled {len(r.frames)} frames, kept {len(kept_frames(r))} after de-dupe ({r.duration:.0f}s)")
-
-    use_sam = segment == "sam" or (segment == "auto" and bool(os.environ.get("MODEL_API_KEY")))
-    if use_sam:
-        sam = SamClient(os.environ["MODEL_API_KEY"], run_dir / "cache")
-        r = detect(r, run_dir, segmenter=SamChangeSegmenter(sam, workers=workers))
-        seg = [c for c in r.model_calls if c.stage == "segment"]
-        fresh = [c for c in seg if not c.cached]
-        elements = sum(1 for x in r.regions if x.kind == "changed element")
-        typer.echo(
-            f"detected {len(r.boundaries)} boundaries -> {len(r.steps)} steps; sam-3.1 segmented the changed element at "
-            f"{elements} of them ({len(r.regions) - elements} full-screen switches): {len(fresh)} API calls, {len(seg) - len(fresh)} cached"
-        )
-    else:
-        r = detect(r, run_dir)
-        typer.echo(f"detected {len(r.boundaries)} boundaries -> {len(r.steps)} steps (pixel-diff only)")
-    store.save(r)
-
-    if do_label:
-        client = LLMClient(LLMConfig.from_env(), run_dir / "cache")
-        r = label(r, run_dir, client, workers=workers)
-        store.save(r)
-        ok = sum(1 for s in r.steps if s.label)
-        lab = [c for c in r.model_calls if c.stage == "label"]
-        fresh = [c for c in lab if not c.cached]
-        typer.echo(
-            f"labelled {ok}/{len(r.steps)} steps with {client.cfg.model}: "
-            f"{len(fresh)} API calls, {len(lab) - len(fresh)} cached, ${r.total_cost_usd:.4f}"
-        )
-
-    r = run_rules(build(r))
-    store.save(r)
-    (run_dir / "run.bpmn").write_text(to_bpmn(r))
-    typer.echo(
-        f"built graph: {len(r.graph.nodes)} nodes, {len(r.graph.edges)} edges, "
-        f"{r.summary.app_switches} app switches, {r.summary.loops} loops; {len(r.findings)} findings"
+        typer.echo(f"seeded cache with {seed_cache(run_dir, cache)} responses from {cache}")
+    r = run_pipeline(
+        r, run_dir, video, store, fps=fps, do_label=do_label, workers=workers, segment=segment,
+        progress=lambda stage, run, line: typer.echo(line),
     )
     _print_steps(r)
     _print_graph(r)

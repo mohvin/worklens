@@ -113,7 +113,7 @@ worklens export <run_id> --format json    # the Run, validated by packages/schem
 cd apps/web && npm install && npm run dev     # http://localhost:3000, reads ./runs
 ```
 
-The deployed demo serves the checked-in replay run; `scripts/sync-samples.mjs` bundles `samples/runs/*` into the app at build time, so Vercel needs no backend, no database and no model key. Deploy: import the repo on Vercel with root directory `apps/web` (keep "include source files outside the root directory" on).
+The deployed site serves the checked-in replay run with no backend (`scripts/sync-samples.mjs` bundles `samples/runs/*` at build time) and, when configured, accepts uploads: the browser puts the recording in Supabase storage, a Modal CPU container runs the pipeline and writes progress to the run record, and the page polls until the findings view is ready. See `docs/deploy.md`.
 
 One page per run: the recording as a timeline strip (colour = application, hatched = waiting, braces = findings), the process map with the loop drawn as a back-edge, the frames behind any box you click, and the top 3 findings with their evidence frames. Download BPMN / JSON from the header.
 
@@ -122,11 +122,11 @@ Tests: `cd services/worker && pytest` (25 tests, all offline: the graph, rules a
 ## Layout
 
 ```
-apps/web/            Next.js 15 findings view: timeline, process map, evidence frames, findings, export
-services/worker/     pipeline: sample -> detect -> label -> build (graph.py) -> rules (rules.py) -> export (export.py)
+apps/web/            Next.js 15: upload, run progress, findings view (timeline, process map, evidence frames, findings, export)
+services/worker/     pipeline: sample -> detect (SAM 3.1) -> label (Muse Spark) -> build -> rules -> export; modal_app.py hosts it
 packages/schema/     run.schema.json, the contract for the export (worklens schema)
 samples/             synthetic recording generator and samples/runs/, the checked-in replay run (frames, labels, model cache)
-docs/                architecture and judging notes
+docs/                deploy.md (Vercel + Supabase + Modal)
 ```
 
 ## Licence
