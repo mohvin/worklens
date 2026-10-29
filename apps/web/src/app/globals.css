@@ -7,6 +7,7 @@
   --brand: #5b2ee6; --brand-soft: #efeafd; --focus: #5b2ee6;
   --danger: #c0392b; --danger-soft: #fbeae7; --warning: #b45309; --warning-soft: #fdf0e0; --success: #1b7f4b; --info: #1d5fd1;
   --app-0: #2d6fd6; --app-1: #0f9d8a; --app-2: #d6509a; --app-3: #d99a00; --app-4: #7a5af5; --app-5: #5f7d8c;
+  --lane: #f8f9fb; --lane-alt: #f2f4f7;
   --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   --r: 6px; --shadow: 0 1px 2px rgba(16,24,40,.06);
 }
@@ -14,12 +15,12 @@
   --bg: #0f1216; --surface: #171b21; --surface-2: #1d2229; --border: #2a313a; --border-2: #222830;
   --text: #e9ecf1; --text-2: #aab3c0; --text-3: #737d8c; --brand: #9a86ff; --brand-soft: #2a2550; --focus: #9a86ff;
   --danger: #ff7a66; --danger-soft: #3a1f1b; --warning: #f0a33a; --warning-soft: #3a2a14; --success: #4ec98a; --info: #6ea2ff;
-  --app-0: #5a95ff; --app-1: #2fd3b4; --app-2: #ff6fb0; --app-3: #ffc53d; --app-4: #b59dff; --app-5: #8aa0b4; --shadow: none; color-scheme: dark; } }
+  --app-0: #5a95ff; --app-1: #2fd3b4; --app-2: #ff6fb0; --app-3: #ffc53d; --app-4: #b59dff; --app-5: #8aa0b4; --lane: #1a1f26; --lane-alt: #161b21; --shadow: none; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0f1216; --surface: #171b21; --surface-2: #1d2229; --border: #2a313a; --border-2: #222830;
   --text: #e9ecf1; --text-2: #aab3c0; --text-3: #737d8c; --brand: #9a86ff; --brand-soft: #2a2550; --focus: #9a86ff;
   --danger: #ff7a66; --danger-soft: #3a1f1b; --warning: #f0a33a; --warning-soft: #3a2a14; --success: #4ec98a; --info: #6ea2ff;
-  --app-0: #5a95ff; --app-1: #2fd3b4; --app-2: #ff6fb0; --app-3: #ffc53d; --app-4: #b59dff; --app-5: #8aa0b4; --shadow: none; color-scheme: dark; }
+  --app-0: #5a95ff; --app-1: #2fd3b4; --app-2: #ff6fb0; --app-3: #ffc53d; --app-4: #b59dff; --app-5: #8aa0b4; --lane: #1a1f26; --lane-alt: #161b21; --shadow: none; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -103,25 +104,41 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .tab[aria-selected="true"] { color: var(--text); font-weight: 500; border-bottom-color: var(--brand); }
 .tab .n { color: var(--text-3); margin-left: 4px; }
 
-/* map */
-.map { padding: 8px; overflow: hidden; }
-.map svg { display: block; width: 100%; height: auto; }
+/* map: vertical swimlanes */
+.map { overflow: auto; padding: 0; position: relative; }
+.map svg { display: block; font-family: var(--font); }
+.lanebg { fill: var(--lane); }
+.lanebg.alt { fill: var(--lane-alt); }
+.lanesep { stroke: var(--border); }
+.lanehead { fill: var(--surface); }
+.lanehead-line { stroke: var(--border); }
+.lanename { font-size: 12.5px; font-weight: 600; fill: var(--text); }
+.lanestat { font-size: 11px; fill: var(--text-3); }
+.band { fill: var(--brand-soft); opacity: .55; }
+.bandline { stroke: var(--brand); stroke-opacity: .5; }
+.bandname { font-size: 11.5px; font-weight: 600; fill: var(--brand); letter-spacing: .02em; }
+.bandmeta { font-size: 11px; fill: var(--text-2); }
 .node { cursor: pointer; }
-.node .box { fill: var(--surface); stroke: var(--border); stroke-width: 1; transition: stroke 120ms; }
+.node .box { fill: var(--surface); stroke: var(--border); stroke-width: 1; transition: stroke 120ms, opacity 120ms; }
 .node:hover .box { stroke: var(--text-3); }
 .node.selected .box { stroke: var(--brand); stroke-width: 2; }
-.node.hot .box { fill: var(--danger-soft); stroke: var(--danger); }
+.node.hot .box { stroke: var(--danger); stroke-width: 1.5; }
+.node.dim { opacity: .3; }
 .node text { pointer-events: none; }
-.node .app { font-size: 10.5px; fill: var(--text-3); }
-.node .action { font-size: 12.5px; fill: var(--text); font-weight: 500; }
-.node .dur { font-size: 11.5px; fill: var(--text-2); }
+.node .action { font-size: 12px; fill: var(--text); font-weight: 500; }
+.node .dur { font-size: 11px; fill: var(--text-2); }
+.node .stepno { font-size: 10px; fill: var(--text-3); }
+.node .wait { fill: url(#hatch); pointer-events: none; }
 .node .badge { font-size: 10px; font-weight: 600; fill: #fff; }
 .node .thumbframe { stroke: var(--border); fill: none; }
-.edge { fill: none; stroke: var(--text-3); stroke-width: 1.2; }
-.edge.back { stroke: var(--danger); stroke-width: 1.8; }
-.edge.dim { opacity: .3; }
+.edge { fill: none; stroke: var(--text-3); stroke-width: 1.4; transition: opacity 120ms; }
+.edge.back { stroke: var(--danger); stroke-dasharray: 5 3; stroke-width: 1.6; }
+.edge.hand { stroke: var(--brand); stroke-dasharray: 5 3; stroke-width: 1.8; }
+.edge.dim { opacity: .2; }
 .edgelabel { font-size: 10.5px; fill: var(--danger); font-weight: 600; }
-.ends { fill: var(--surface); stroke: var(--text-2); stroke-width: 1.2; }
+.handlabel { font-size: 11px; fill: var(--brand); font-weight: 600; }
+.ends { fill: var(--surface); stroke: var(--text-2); stroke-width: 2; }
+.zoom { display: flex; gap: 4px; align-self: center; padding-right: 8px; }
 
 /* steps table */
 .table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
