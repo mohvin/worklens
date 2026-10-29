@@ -54,3 +54,16 @@ export function processFindings(proc: Process, model: MapModel): UFinding[] {
   const all = [...cross, ...own];
   return all.sort((a, b) => (a.cross !== b.cross ? (a.cross ? -1 : 1) : SEV[a.severity] - SEV[b.severity] || b.seconds - a.seconds));
 }
+
+/** Seconds inside steps that at least one finding points at; overlapping findings count once. */
+export function flaggedSeconds(findings: UFinding[], model: MapModel): number {
+  const seen = new Set<string>();
+  let t = 0;
+  for (const f of findings) for (const r of f.refs) {
+    const k = `${r.rec}:${r.step}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    t += model.recs[r.rec]?.run.steps[r.step]?.duration ?? 0;
+  }
+  return t;
+}
