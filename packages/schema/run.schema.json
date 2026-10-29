@@ -22,18 +22,37 @@
           "type": "integer"
         },
         "score": {
-          "description": "How different the two frames are, 0..1",
+          "description": "How different the two frames are, 0..1 (pixel-diff)",
           "title": "Score",
           "type": "number"
         },
         "method": {
+          "const": "pixel-diff",
           "default": "pixel-diff",
-          "enum": [
-            "pixel-diff",
-            "sam-3.1"
-          ],
           "title": "Method",
           "type": "string"
+        },
+        "changed_fraction": {
+          "default": 0.0,
+          "description": "Fraction of the screen that changed at this boundary, 0..1",
+          "title": "Changed Fraction",
+          "type": "number"
+        },
+        "change_box": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "x1,y1,x2,y2 of the UI element that changed, from SAM 3.1; None for a full-screen change",
+          "title": "Change Box"
         }
       },
       "required": [
@@ -334,6 +353,55 @@
       "title": "Node",
       "type": "object"
     },
+    "Region": {
+      "description": "A UI region SAM 3.1 segmented on a frame.",
+      "properties": {
+        "frame": {
+          "title": "Frame",
+          "type": "integer"
+        },
+        "kind": {
+          "description": "changed element: SAM-refined box of what changed; screen change: most of the screen changed",
+          "enum": [
+            "changed element",
+            "screen change"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "x1": {
+          "title": "X1",
+          "type": "integer"
+        },
+        "y1": {
+          "title": "Y1",
+          "type": "integer"
+        },
+        "x2": {
+          "title": "X2",
+          "type": "integer"
+        },
+        "y2": {
+          "title": "Y2",
+          "type": "integer"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frame",
+        "kind",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "confidence"
+      ],
+      "title": "Region",
+      "type": "object"
+    },
     "Step": {
       "properties": {
         "index": {
@@ -509,6 +577,17 @@
       "title": "Fps Sampled",
       "type": "number"
     },
+    "frame_width": {
+      "default": 0,
+      "description": "Pixel size of the sampled frames; region boxes use this space",
+      "title": "Frame Width",
+      "type": "integer"
+    },
+    "frame_height": {
+      "default": 0,
+      "title": "Frame Height",
+      "type": "integer"
+    },
     "status": {
       "default": "created",
       "enum": [
@@ -534,6 +613,14 @@
         "$ref": "#/$defs/Boundary"
       },
       "title": "Boundaries",
+      "type": "array"
+    },
+    "regions": {
+      "description": "What changed at each boundary, segmented by SAM 3.1",
+      "items": {
+        "$ref": "#/$defs/Region"
+      },
+      "title": "Regions",
       "type": "array"
     },
     "steps": {

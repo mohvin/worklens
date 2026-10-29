@@ -111,11 +111,16 @@ section.block > h2 span { font-weight: 400; color: var(--ink-3); }
 .fields { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 0.86rem; }
 .fields li { background: var(--paper); border-radius: 3px; padding: 2px 8px; color: var(--ink-2); }
 .fields li.obj { background: var(--brand-soft); color: var(--brand); }
+.drawer p.change { margin: -4px 0 10px; font-size: 0.86rem; color: var(--ink-2); }
+.filmstrip figure.closeupfig { padding-right: 10px; border-right: 1px dashed var(--rule); }
+.filmstrip svg.closeup { background: var(--brand-soft); border-color: var(--brand); }
+.drawer header .toggle { font-size: 0.86rem; color: var(--ink-2); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.drawer header .toggle input { accent-color: var(--brand); }
 .stepframes + .stepframes { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule-2); }
 .stepframes h4 { margin: 0 0 8px; font-size: 0.9rem; font-weight: 500; color: var(--ink-2); }
 .filmstrip { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
 .filmstrip figure { margin: 0; flex: 0 0 auto; width: 220px; }
-.filmstrip img { width: 220px; height: auto; border: 1px solid var(--rule); border-radius: 3px; display: block; background: #ddd; }
+.filmstrip img, .filmstrip svg.frame { width: 220px; height: auto; border: 1px solid var(--rule); border-radius: 3px; display: block; background: #ddd; }
 .filmstrip figcaption { font-size: 0.8rem; color: var(--ink-3); margin-top: 4px; }
 .filmstrip figure.evidence img { border-color: var(--heat-high); box-shadow: 0 0 0 1px var(--heat-high); }
 
@@ -166,7 +171,7 @@ footer.foot { margin: 48px 0 32px; color: var(--ink-3); font-size: 0.86rem; disp
   .top .wrap { gap: 14px; }
   .runhead h1 small { display: block; margin: 2px 0 0; }
   .finding { grid-template-columns: 36px 1fr; padding: 14px 12px; }
-  .filmstrip figure, .filmstrip img { width: 170px; }
+  .filmstrip figure, .filmstrip img, .filmstrip svg.frame { width: 170px; }
   .runlist a { grid-template-columns: 1fr auto; }
   .runlist a span:nth-child(3), .runlist a span:nth-child(4) { display: none; }
 }

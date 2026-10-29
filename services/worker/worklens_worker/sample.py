@@ -51,6 +51,9 @@ def sample(run: Run, run_dir: Path, video: Path, fps: float = 1.0, dup_threshold
     run.duration = probe_duration(video)
     run.fps_sampled = fps
     paths = extract_frames(video, run_dir / "frames", fps)
+    if paths:
+        with Image.open(paths[0]) as im:
+            run.frame_width, run.frame_height = im.size
 
     frames: list[Frame] = []
     last_kept: imagehash.ImageHash | None = None

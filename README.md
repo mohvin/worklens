@@ -13,7 +13,8 @@ recording.mp4
    │  1. sample      ffmpeg, 1 frame/s, perceptual-hash + pixel de-dupe (60-80% of frames dropped)
    ▼
 frames/
-   │  2. detect      step boundaries: pixel-diff on all frames (SAM 3.1 region-change detector: in progress)
+   │  2. detect      step boundaries by pixel-diff; at each one, Meta SAM 3.1 is prompted with the changed area
+   │                 and returns the exact UI element that changed (the dialog, the form, the opened email)
    ▼
 steps
    │  3. label       Meta Muse Spark reads the first, last and next frame of each step
@@ -31,8 +32,8 @@ process map + findings with evidence frames + JSON / BPMN 2.0 export
 
 | Model | Stage | Role |
 | --- | --- | --- |
-| **Muse Spark 1.3** (multimodal) | label | Looks at three frames per step and names the application, action, object and data fields. Strict JSON schema, temperature 0, low reasoning effort, one retry with a bigger token budget. |
-| **SAM 3.1** | detect | Segments each kept frame into UI regions; a change in the region set marks a step boundary. Adapter is stubbed in `detect.py` pending Meta Model API access; the pixel-diff detector is the shipped fallback. |
+| **Muse Spark 1.3** (multimodal) | label | Looks at three frames per step, plus the SAM close-up of what changed, and names the application, action, object and data fields. Strict JSON schema, temperature 0, low reasoning effort, one retry with a bigger token budget. |
+| **SAM 3.1** | detect | At every step boundary, pixel-diff locates where the new frame differs; SAM 3.1 is prompted with that box (visual prompt) and returns the precise UI element that changed. The element's box is stored on the boundary, cropped as an extra image for Muse Spark, and outlined in the UI with a close-up. A change covering half the screen is a screen switch and needs no call. We tried SAM with noun-phrase prompts first ("input field", "button", "table row"): it works on forms but finds nothing on a real Gmail screen except icons (`scripts/sam_sweep.py`), so the visual-prompt design is the one that ships. |
 
 Every model call is cached on disk, keyed by the prompt and a perceptual fingerprint of the frames (so the cache survives re-extracting the video on another machine), and recorded with tokens, latency and cost in `run.json`. A complete run of the sample recording is checked in under `samples/runs/synthetic-invoice/`, so the pipeline and the UI can be replayed with zero API calls:
 
@@ -45,10 +46,10 @@ worklens run samples/synthetic-invoice.mp4 --cache samples/runs/synthetic-invoic
 Requirements: Python 3.11+, ffmpeg.
 
 ```bash
-cp .env.example .env            # add your key (OpenRouter or Meta Model API)
+cp .env.example .env            # add MODEL_API_KEY (Meta Model API); OPENROUTER_API_KEY works as a fallback
 pip install -e services/worker
 python samples/make_synthetic.py            # builds samples/synthetic-invoice.mp4 (no real data)
-worklens run samples/synthetic-invoice.mp4  # ~12 model calls, about $0.09
+worklens run samples/synthetic-invoice.mp4  # 11 SAM calls + 12 Muse Spark calls
 ```
 
 Output for the synthetic recording (95 s, 12 steps, one long wait, one loop back to Mail):
@@ -116,7 +117,7 @@ The deployed demo serves the checked-in replay run; `scripts/sync-samples.mjs` b
 
 One page per run: the recording as a timeline strip (colour = application, hatched = waiting, braces = findings), the process map with the loop drawn as a back-edge, the frames behind any box you click, and the top 3 findings with their evidence frames. Download BPMN / JSON from the header.
 
-Tests: `cd services/worker && pytest` (19 tests, all offline: the graph, rules and export tests use the cached labels in `tests/fixtures`).
+Tests: `cd services/worker && pytest` (25 tests, all offline: the graph, rules and export tests use the cached labels in `tests/fixtures`).
 
 ## Layout
 

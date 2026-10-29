@@ -1,7 +1,8 @@
 // Mirrors services/worker/worklens_worker/models.py (packages/schema/run.schema.json).
 
 export interface Frame { index: number; t: number; path: string; phash: string; kept: boolean }
-export interface Boundary { index: number; t: number; frame_before: number; frame_after: number; score: number; method: string }
+export interface Boundary { index: number; t: number; frame_before: number; frame_after: number; score: number; method: string; changed_fraction?: number; change_box?: number[] | null }
+export interface Region { frame: number; kind: "changed element" | "screen change"; x1: number; y1: number; x2: number; y2: number; confidence: number }
 export interface StepLabel { application: string; action: string; object: string; data_fields: string[]; confidence: number }
 export interface Step {
   index: number; t_start: number; t_end: number; duration: number;
@@ -28,7 +29,8 @@ export interface Summary {
 }
 export interface Run {
   id: string; source: string; duration: number; fps_sampled: number; status: string;
-  frames: Frame[]; boundaries: Boundary[]; steps: Step[]; graph: Graph; summary: Summary;
+  frame_width?: number; frame_height?: number;
+  frames: Frame[]; boundaries: Boundary[]; regions?: Region[]; steps: Step[]; graph: Graph; summary: Summary;
   findings: Finding[]; model_calls: ModelCall[];
 }
 

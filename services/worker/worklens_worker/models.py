@@ -26,8 +26,22 @@ class Boundary(BaseModel):
     t: float
     frame_before: int = Field(description="Index of the last frame of the previous state")
     frame_after: int = Field(description="Index of the first frame of the new state")
-    score: float = Field(description="How different the two frames are, 0..1")
-    method: Literal["pixel-diff", "sam-3.1"] = "pixel-diff"
+    score: float = Field(description="How different the two frames are, 0..1 (pixel-diff)")
+    method: Literal["pixel-diff"] = "pixel-diff"
+    changed_fraction: float = Field(default=0.0, description="Fraction of the screen that changed at this boundary, 0..1")
+    change_box: list[int] | None = Field(default=None, description="x1,y1,x2,y2 of the UI element that changed, from SAM 3.1; None for a full-screen change")
+
+
+class Region(BaseModel):
+    """A UI region SAM 3.1 segmented on a frame."""
+
+    frame: int
+    kind: Literal["changed element", "screen change"] = Field(description="changed element: SAM-refined box of what changed; screen change: most of the screen changed")
+    x1: int
+    y1: int
+    x2: int
+    y2: int
+    confidence: float
 
 
 class StepLabel(BaseModel):
@@ -118,9 +132,12 @@ class Run(BaseModel):
     source: str = Field(description="Recording file name")
     duration: float = 0.0
     fps_sampled: float = 1.0
+    frame_width: int = Field(default=0, description="Pixel size of the sampled frames; region boxes use this space")
+    frame_height: int = 0
     status: Literal["created", "sampled", "detected", "labelled", "built", "failed"] = "created"
     frames: list[Frame] = Field(default_factory=list)
     boundaries: list[Boundary] = Field(default_factory=list)
+    regions: list[Region] = Field(default_factory=list, description="What changed at each boundary, segmented by SAM 3.1")
     steps: list[Step] = Field(default_factory=list)
     graph: Graph = Field(default_factory=Graph)
     summary: Summary = Field(default_factory=Summary)

@@ -25,24 +25,51 @@ from .models import ModelCall
 PROMPT_VERSION = "v3"  # v3: cache key uses the frame fingerprint, not the JPEG bytes
 
 
+META_BASE_URL = "https://api.meta.ai/v1"
+# USD per 1M tokens, used when the endpoint does not report cost itself (Meta Model API).
+# Override with WORKLENS_PRICE_IN / WORKLENS_PRICE_OUT once the billing page shows the real rates.
+DEFAULT_PRICE_IN = 0.0
+DEFAULT_PRICE_OUT = 0.0
+
+
 @dataclass
 class LLMConfig:
     base_url: str
     model: str
     api_key: str
-    reasoning_effort: str = "low"  # Muse Spark always reasons; keep it short
-    max_tokens: int = 1500
+    reasoning_effort: str = "low"  # Muse Spark reasons by default; keep it short
+    max_tokens: int = 1500  # OpenRouter; the Meta API counts reasoning tokens in the cap, see from_env
     timeout_s: float = 120.0
+    price_in: float = DEFAULT_PRICE_IN
+    price_out: float = DEFAULT_PRICE_OUT
+
+    @property
+    def is_meta(self) -> bool:
+        return "api.meta.ai" in self.base_url
 
     @classmethod
     def from_env(cls) -> "LLMConfig":
-        key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("WORKLENS_LLM_API_KEY") or ""
+        """Meta Model API when MODEL_API_KEY is set, else OpenRouter (OPENROUTER_API_KEY).
+
+        WORKLENS_LLM_BASE_URL / WORKLENS_LLM_MODEL override either.
+        """
+        meta_key = os.environ.get("MODEL_API_KEY") or ""
+        or_key = os.environ.get("OPENROUTER_API_KEY") or ""
+        provider = os.environ.get("WORKLENS_LLM_PROVIDER") or ("meta" if meta_key else "openrouter")
+        meta = provider == "meta"
+        key = os.environ.get("WORKLENS_LLM_API_KEY") or (meta_key if meta else or_key)
         if not key:
-            raise RuntimeError("Set OPENROUTER_API_KEY (or WORKLENS_LLM_API_KEY) in .env")
+            raise RuntimeError("Set MODEL_API_KEY (Meta Model API) or OPENROUTER_API_KEY in .env")
+        base = os.environ.get("WORKLENS_LLM_BASE_URL") or (META_BASE_URL if meta else "https://openrouter.ai/api/v1")
+        model = os.environ.get("WORKLENS_LLM_MODEL") or ("muse-spark-1.3" if meta else "meta/muse-spark-1.3")
         return cls(
-            base_url=os.environ.get("WORKLENS_LLM_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/"),
-            model=os.environ.get("WORKLENS_LLM_MODEL", "meta/muse-spark-1.3"),
+            base_url=base.rstrip("/"),
+            model=model,
             api_key=key,
+            reasoning_effort=os.environ.get("WORKLENS_REASONING_EFFORT", "low"),
+            max_tokens=int(os.environ.get("WORKLENS_MAX_TOKENS", 4000 if meta else 1500)),
+            price_in=float(os.environ.get("WORKLENS_PRICE_IN", DEFAULT_PRICE_IN)),
+            price_out=float(os.environ.get("WORKLENS_PRICE_OUT", DEFAULT_PRICE_OUT)),
         )
 
 
@@ -94,6 +121,15 @@ class LLMClient:
             timeout=cfg.timeout_s,
         )
 
+    def _cost(self, usage: dict[str, Any]) -> float:
+        if "cost" in usage:  # OpenRouter reports it
+            return float(usage.get("cost") or 0.0)
+        return round(
+            usage.get("prompt_tokens", 0) / 1e6 * self.cfg.price_in
+            + usage.get("completion_tokens", 0) / 1e6 * self.cfg.price_out,
+            6,
+        )
+
     def _near_hit(self, pkey: str, fps: list[str]) -> str | None:
         """Cache entry for the same prompt whose frames look the same (re-extracted video)."""
         for side in self.cache_dir.glob("*.fp.json"):
@@ -131,11 +167,9 @@ class LLMClient:
         cached = self.cache_dir / f"{key}.json"
         sidecar = self.cache_dir / f"{key}.fp.json"
 
-        body = {
+        body: dict[str, Any] = {
             "model": self.cfg.model,
             "temperature": 0,
-            "max_tokens": self.cfg.max_tokens,
-            "reasoning": {"effort": self.cfg.reasoning_effort},
             "messages": [
                 {"role": "system", "content": system},
                 {"role": "user", "content": [{"type": "text", "text": user_text}, *[image_part(p) for p in images]]},
@@ -144,8 +178,15 @@ class LLMClient:
                 "type": "json_schema",
                 "json_schema": {"name": schema_name, "strict": True, "schema": schema},
             },
-            "usage": {"include": True},
         }
+        if self.cfg.is_meta:
+            body["max_completion_tokens"] = self.cfg.max_tokens
+            body["reasoning_effort"] = self.cfg.reasoning_effort
+        else:  # OpenRouter
+            body["max_tokens"] = self.cfg.max_tokens
+            body["reasoning"] = {"effort": self.cfg.reasoning_effort}
+            body["usage"] = {"include": True}
+        tokens_key = "max_completion_tokens" if self.cfg.is_meta else "max_tokens"
 
         last_err = "no attempt"
         for attempt in range(retries + 1):
@@ -165,7 +206,7 @@ class LLMClient:
                     finish = choice.get("finish_reason")
                     reasoning = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
                     last_err = f"empty content (finish_reason={finish}, reasoning_tokens={reasoning})"
-                    body["max_tokens"] = int(body["max_tokens"] * 2)
+                    body[tokens_key] = int(body[tokens_key] * 2)
                     continue
                 data = json.loads(content)
                 cached.write_text(json.dumps(data))
@@ -175,7 +216,7 @@ class LLMClient:
                     latency_s=round(latency, 3),
                     prompt_tokens=usage.get("prompt_tokens", 0),
                     completion_tokens=usage.get("completion_tokens", 0),
-                    cost_usd=float(usage.get("cost", 0.0)),
+                    cost_usd=self._cost(usage),
                 )
                 self.calls.append(call)
                 return data, call

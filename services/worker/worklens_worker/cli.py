@@ -17,13 +17,14 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 
-from .detect import detect
+from .detect import SamChangeSegmenter, detect
 from .export import to_bpmn, to_json
 from .graph import build
 from .label import label
 from .llm import LLMClient, LLMConfig
 from .models import Run
 from .rules import run_rules
+from .sam import SamClient
 from .sample import kept_frames, sample
 from .store import RunStore
 
@@ -48,6 +49,7 @@ def run(
     do_label: bool = typer.Option(True, "--label/--no-label", help="Call the Meta model to label steps"),
     workers: int = typer.Option(4, help="Parallel model calls"),
     cache: Path | None = typer.Option(None, exists=True, file_okay=False, help="Seed the model cache from this directory (replay without API calls)"),
+    segment: str = typer.Option("auto", help="sam: SAM 3.1 segments what changed at each boundary; none: skip; auto: sam when MODEL_API_KEY is set"),
 ) -> None:
     """Run the pipeline on a screen recording."""
     _load_env()
@@ -65,9 +67,21 @@ def run(
     store.save(r)
     typer.echo(f"sampled {len(r.frames)} frames, kept {len(kept_frames(r))} after de-dupe ({r.duration:.0f}s)")
 
-    r = detect(r, run_dir)
+    use_sam = segment == "sam" or (segment == "auto" and bool(os.environ.get("MODEL_API_KEY")))
+    if use_sam:
+        sam = SamClient(os.environ["MODEL_API_KEY"], run_dir / "cache")
+        r = detect(r, run_dir, segmenter=SamChangeSegmenter(sam, workers=workers))
+        seg = [c for c in r.model_calls if c.stage == "segment"]
+        fresh = [c for c in seg if not c.cached]
+        elements = sum(1 for x in r.regions if x.kind == "changed element")
+        typer.echo(
+            f"detected {len(r.boundaries)} boundaries -> {len(r.steps)} steps; sam-3.1 segmented the changed element at "
+            f"{elements} of them ({len(r.regions) - elements} full-screen switches): {len(fresh)} API calls, {len(seg) - len(fresh)} cached"
+        )
+    else:
+        r = detect(r, run_dir)
+        typer.echo(f"detected {len(r.boundaries)} boundaries -> {len(r.steps)} steps (pixel-diff only)")
     store.save(r)
-    typer.echo(f"detected {len(r.boundaries)} boundaries -> {len(r.steps)} steps")
 
     if do_label:
         client = LLMClient(LLMConfig.from_env(), run_dir / "cache")
