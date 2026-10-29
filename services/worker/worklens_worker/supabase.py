@@ -51,6 +51,31 @@ class Supabase:
             )
             r.raise_for_status()
 
+    def list_runs(self, process_id: str) -> list[dict[str, Any]]:
+        """The runs of a process in handoff order."""
+        with self._client() as c:
+            r = c.get("/rest/v1/runs", params={"process_id": f"eq.{process_id}", "select": "*", "order": "position.asc,created_at.asc"})
+            r.raise_for_status()
+            return r.json()
+
+    # ---- table: processes ----
+    def get_process(self, process_id: str) -> dict[str, Any] | None:
+        with self._client() as c:
+            r = c.get("/rest/v1/processes", params={"id": f"eq.{process_id}", "select": "*"})
+            r.raise_for_status()
+            rows = r.json()
+            return rows[0] if rows else None
+
+    def update_process(self, process_id: str, **fields: Any) -> None:
+        with self._client() as c:
+            r = c.patch(
+                "/rest/v1/processes",
+                params={"id": f"eq.{process_id}"},
+                headers={"Prefer": "return=minimal", "Content-Type": "application/json"},
+                content=json.dumps(fields),
+            )
+            r.raise_for_status()
+
     # ---- storage ----
     def download(self, bucket: str, path: str) -> bytes:
         with self._client(timeout=600.0) as c:

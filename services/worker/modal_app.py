@@ -88,20 +88,54 @@ def process_run(run_id: str) -> dict:
                     "frames_available": publish, "log": log,
                 },
             )
+            if row.get("process_id"):
+                build_process_job.spawn(row["process_id"])
             return {"ok": True, "steps": len(run.steps), "findings": len(run.findings)}
     except Exception as e:  # noqa: BLE001 - report every failure on the run record
         sb.update_run(run_id, status="failed", error=f"{type(e).__name__}: {e}"[:1000], progress={"log": log + [traceback.format_exc()[-2000:]]})
         return {"error": str(e)}
 
 
+@app.function(image=image, secrets=secrets, timeout=600)
+def build_process_job(process_id: str) -> dict:
+    """Merge the built runs of a process (in position order) into process_json. Deterministic, no model calls."""
+    from worklens_worker.export import to_process_bpmn
+    from worklens_worker.models import Run
+    from worklens_worker.process import build_process
+    from worklens_worker.supabase import Supabase
+
+    sb = Supabase.from_env()
+    row = sb.get_process(process_id)
+    if row is None:
+        return {"error": "no such process"}
+    try:
+        sb.update_process(process_id, status="building", error=None)
+        rows = [r for r in sb.list_runs(process_id) if r.get("status") == "built" and r.get("run_json")]
+        if not rows:
+            raise RuntimeError("no built recordings in this process yet")
+        runs = [Run.model_validate(r["run_json"]) for r in rows]
+        roles = [r.get("role") or f"Recording {i + 1}" for i, r in enumerate(rows)]
+        proc = build_process(process_id, row["name"], runs, roles)
+        sb.upload("runs", f"processes/{process_id}/process.bpmn", to_process_bpmn(proc, runs).encode(), "application/xml")
+        sb.update_process(process_id, status="built", process_json=proc.model_dump())
+        return {"ok": True, "recordings": len(runs), "findings": len(proc.findings)}
+    except Exception as e:  # noqa: BLE001
+        sb.update_process(process_id, status="failed", error=f"{type(e).__name__}: {e}"[:1000])
+        return {"error": str(e)}
+
+
 @app.function(image=image, secrets=secrets)
 @modal.fastapi_endpoint(method="POST")
 def enqueue(body: dict) -> dict:
-    """POST {"run_id": "...", "secret": "..."}: start processing in the background."""
+    """POST {"run_id": "...", "secret": "..."} to process a recording, or {"process_id": "...", "secret": "..."} to merge a process."""
     if not body.get("secret") or body["secret"] != os.environ.get("WORKLENS_WORKER_SECRET"):
         return {"error": "unauthorised"}
+    process_id = str(body.get("process_id", ""))
+    if process_id:
+        call = build_process_job.spawn(process_id)
+        return {"ok": True, "call_id": call.object_id}
     run_id = str(body.get("run_id", ""))
     if not run_id:
-        return {"error": "run_id required"}
+        return {"error": "run_id or process_id required"}
     call = process_run.spawn(run_id)
     return {"ok": True, "call_id": call.object_id}

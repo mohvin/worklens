@@ -5,6 +5,8 @@
     worklens run samples/synthetic-invoice.mp4 --cache samples/runs/synthetic-invoice/cache   # replay, $0
     worklens show <run_id>                               # print steps, graph and findings
     worklens export <run_id> --format bpmn               # write run.bpmn (or run.json) next to run.json
+    worklens process "Invoice approval" --rec "AP clerk=<run_id>" --rec "Approver=<run_id>" --out processes/invoice-approval
+                                                         # merge recordings into one process (process.json + process.bpmn)
     worklens schema                                      # write packages/schema/run.schema.json
 """
 from __future__ import annotations
@@ -16,10 +18,11 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 
-from .export import to_bpmn, to_json
+from .export import to_bpmn, to_json, to_process_bpmn
 from .graph import build
 from .models import Run
 from .pipeline import run_pipeline, seed_cache
+from .process import build_process
 from .rules import run_rules
 from .store import RunStore
 
@@ -98,6 +101,39 @@ def export(
     out = out or store.dir(run_id) / f"run.{fmt}"
     out.write_text(text)
     typer.echo(f"wrote {out}")
+
+
+@app.command()
+def process(
+    name: str,
+    rec: list[str] = typer.Option(..., "--rec", help="role=run_id, in handoff order; run_id may also be a path to a run directory"),
+    out: Path = typer.Option(..., help="Directory to write process.json and process.bpmn into"),
+    process_id: str | None = typer.Option(None, help="Id for the process (default: the output directory name)"),
+    runs_dir: Path | None = typer.Option(None),
+) -> None:
+    """Merge recordings, one per role, into one process: handoffs and cross-role findings. No model calls."""
+    store = _store(runs_dir)
+    roles: list[str] = []
+    runs: list[Run] = []
+    for item in rec:
+        if "=" not in item:
+            raise typer.BadParameter(f"--rec must be role=run_id, got {item!r}")
+        role, ref = item.split("=", 1)
+        path = Path(ref)
+        r = Run.model_validate_json((path / "run.json").read_text()) if path.is_dir() else store.load(ref)
+        roles.append(role.strip())
+        runs.append(r)
+    proc = build_process(process_id or out.name, name, runs, roles)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "process.json").write_text(json.dumps(proc.model_dump(), indent=2))
+    (out / "process.bpmn").write_text(to_process_bpmn(proc, runs))
+    typer.echo(f"{name}: {len(runs)} recordings, {proc.summary.handoffs} handoff(s), {len(proc.findings)} finding(s) across roles")
+    for h in proc.handoffs:
+        a, b = proc.recordings[h.from_ref.rec], proc.recordings[h.to_ref.rec]
+        typer.echo(f"  handoff {a.role} → {b.role} via {h.via}" + (f" · {h.object}" if h.object else " · by order only"))
+    for f in proc.findings:
+        typer.echo(f"  [{f.severity:6}] {f.title} ({f.seconds:.0f} s)")
+    typer.echo(f"wrote {out / 'process.json'} and {out / 'process.bpmn'}")
 
 
 @app.command()

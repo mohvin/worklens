@@ -147,3 +147,74 @@ class Run(BaseModel):
     @property
     def total_cost_usd(self) -> float:
         return round(sum(c.cost_usd for c in self.model_calls), 6)
+
+
+# ---- a process: several recordings, one per role, joined by handoffs ----
+
+
+class Recording(BaseModel):
+    """One recording inside a process, in handoff order."""
+
+    index: int
+    run_id: str
+    role: str = Field(description="Who recorded it, as typed at upload: 'AP clerk', 'Approver'")
+    source: str
+    duration: float
+    steps: int
+    findings: int
+
+
+class Ref(BaseModel):
+    """A step in one of the process's recordings."""
+
+    rec: int
+    step: int
+    node_id: str = ""
+
+
+class FrameRef(BaseModel):
+    rec: int
+    frame: int
+
+
+class Handoff(BaseModel):
+    """Where one role's recording ends and the next one begins."""
+
+    from_ref: Ref
+    to_ref: Ref
+    via: str = Field(description="Application the work was handed over in, e.g. Mail")
+    object: str = Field(default="", description="A value seen on both sides, e.g. an invoice number")
+    matched: bool = Field(default=False, description="True when the same values were seen on both sides; False when only the order of recordings joins them")
+
+
+class ProcessFinding(BaseModel):
+    rule: Literal["cross-check", "cross-rekey", "handoff-detour"]
+    title: str
+    detail: str
+    severity: Literal["low", "medium", "high"]
+    refs: list[Ref]
+    evidence: list[FrameRef] = Field(default_factory=list)
+    seconds: float = 0.0
+    share: float = Field(default=0.0, description="seconds / total time of all recordings")
+
+
+class ProcessSummary(BaseModel):
+    total_duration: float = 0.0
+    wait_duration: float = 0.0
+    steps: int = 0
+    applications: list[str] = Field(default_factory=list)
+    roles: list[str] = Field(default_factory=list)
+    app_switches: int = 0
+    loops: int = 0
+    handoffs: int = 0
+    run_findings: int = 0
+
+
+class Process(BaseModel):
+    id: str
+    name: str
+    status: Literal["created", "building", "built", "failed"] = "created"
+    recordings: list[Recording] = Field(default_factory=list)
+    handoffs: list[Handoff] = Field(default_factory=list)
+    findings: list[ProcessFinding] = Field(default_factory=list, description="Findings across roles; each recording keeps its own findings in its Run")
+    summary: ProcessSummary = Field(default_factory=ProcessSummary)
