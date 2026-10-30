@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Recommendations, RecStatus } from "@/lib/types";
 import type { MapModel } from "@/lib/model";
 import type { UFinding } from "@/lib/findings";
@@ -12,10 +12,30 @@ import { BeforeAfter, TargetHeadline, TargetMap, WhatChanges } from "./TargetVie
 
 export type RecTab = "recs" | "target";
 
-export function useRecommendations(initial: Recommendations | null, decideUrl: string | null) {
+export function useRecommendations(initial: Recommendations | null, decideUrl: string | null, screens = 0) {
   const [recs, setRecs] = useState<Recommendations | null>(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState<{ since: number; elapsed: number } | null>(null);
+  const prevStamp = useRef<string | null>(initial?.generated_at ?? null);
+  // poll while a generation is running; stop when a new set arrives or after 4 minutes
+  useEffect(() => {
+    if (!generating || !decideUrl) return;
+    const t = setInterval(async () => {
+      const elapsed = Math.round((Date.now() - generating.since) / 1000);
+      setGenerating((g) => (g ? { ...g, elapsed } : g));
+      try {
+        const r = await fetch(decideUrl, { cache: "no-store" });
+        const j = (await r.json()) as { recommendations?: Recommendations | null };
+        if (j.recommendations && j.recommendations.generated_at !== prevStamp.current) {
+          prevStamp.current = j.recommendations.generated_at;
+          setRecs(j.recommendations); setGenerating(null); return;
+        }
+      } catch { /* keep polling */ }
+      if (elapsed > 240) { setGenerating(null); setError("The worker did not answer in 4 minutes. Try again, or check the Modal logs."); }
+    }, 3000);
+    return () => clearInterval(t);
+  }, [generating?.since, decideUrl]);  // eslint-disable-line react-hooks/exhaustive-deps
   const decide = async (id: string, status: RecStatus, by: string, note: string) => {
     if (!decideUrl) return;
     setBusy(true); setError(null);
@@ -29,10 +49,35 @@ export function useRecommendations(initial: Recommendations | null, decideUrl: s
   const regenerate = async () => {
     if (!decideUrl) return;
     setBusy(true); setError(null);
-    try { const r = await fetch(decideUrl, { method: "POST" }); const j = (await r.json()) as { error?: string }; if (!r.ok) throw new Error(j.error ?? "Could not start"); setError("Regenerating in the background; reload in a minute."); }
+    try { const r = await fetch(decideUrl, { method: "POST" }); const j = (await r.json()) as { error?: string }; if (!r.ok) throw new Error(j.error ?? "Could not start"); setGenerating({ since: Date.now(), elapsed: 0 }); }
     catch (e) { setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); }
   };
-  return { recs, busy, error, decide, regenerate };
+  return { recs, busy, error, decide, regenerate, generating, screens };
+}
+
+/** What the worker is doing right now, from the elapsed time (the job reports no finer progress). */
+function stageFor(elapsed: number, screens: number): { label: string; pct: number } {
+  if (elapsed < 6) return { label: "Queued on the worker", pct: 8 };
+  if (elapsed < 15) return { label: "Loading the recording and the findings", pct: 20 };
+  if (elapsed < 60) return { label: `Muse Spark is classifying ${screens || "the"} screens from the mechanism menu`, pct: 20 + Math.min(55, (elapsed - 15) * 1.3) };
+  return { label: "Computing savings and the target process", pct: Math.min(95, 75 + (elapsed - 60) * 0.3) };
+}
+
+export function GeneratingPanel({ elapsed, screens, replacing }: { elapsed: number; screens: number; replacing: boolean }) {
+  const st = stageFor(elapsed, screens);
+  return (
+    <div className="gen" role="status" aria-live="polite">
+      <div className="gen-h"><b>{replacing ? "Regenerating recommendations" : "Generating recommendations"}</b><span>{elapsed} s</span></div>
+      <div className="bar"><i style={{ width: `${st.pct}%` }} /></div>
+      <div className="gen-stages">
+        {["Queued on the worker", "Loading the recording and the findings", "Muse Spark classifies each screen", "Savings and the target process"].map((l, i) => {
+          const idx = elapsed < 6 ? 0 : elapsed < 15 ? 1 : elapsed < 60 ? 2 : 3;
+          return <div key={l} className={`stage ${i < idx ? "done" : i === idx ? "now" : ""}`}><i />{l}</div>;
+        })}
+      </div>
+      <p className="hint">{st.label}. The fix path is computed by rules; the AI path is one Muse Spark call with strict JSON. Usually under a minute.</p>
+    </div>
+  );
 }
 
 export interface RecState {
@@ -41,6 +86,7 @@ export interface RecState {
   applied: "proposed" | "accepted"; setApplied: (a: "proposed" | "accepted") => void;
   zoom: "fit" | 1; selectedKey: string | null; onSelectNode: (k: string | null) => void;
   canDecide: boolean; busy: boolean; error: string | null; decide: (id: string, status: RecStatus, by: string, note: string) => void; regenerate: () => void;
+  generating: { since: number; elapsed: number } | null; screens: number;
 }
 
 export function RecEmpty({ canDecide, busy, regenerate, error }: { canDecide: boolean; busy: boolean; regenerate: () => void; error: string | null }) {
@@ -54,6 +100,7 @@ export function RecEmpty({ canDecide, busy, regenerate, error }: { canDecide: bo
 }
 
 export function RecMain({ tab, st }: { tab: RecTab; st: RecState }) {
+  if (st.generating) return <GeneratingPanel elapsed={st.generating.elapsed} screens={st.screens} replacing={Boolean(st.recs)} />;
   if (!st.recs) return <RecEmpty canDecide={st.canDecide} busy={st.busy} regenerate={st.regenerate} error={st.error} />;
   if (tab === "recs") return <RecList recs={st.recs} model={st.model} filter={st.filter} onFilter={st.setFilter} selectedId={st.selectedId} onSelect={st.setSelectedId} />;
   const target = st.applied === "accepted" ? st.recs.target_accepted : st.recs.target;

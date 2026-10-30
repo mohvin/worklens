@@ -32,7 +32,7 @@ export default function RunView({ run, frameBase, frames, sample, processedAt, c
   const [rsel, setRsel] = useState<string | null>(null);
   const [applied, setApplied] = useState<"proposed" | "accepted">("proposed");
   const decideUrl = sample ? null : `/api/runs/${run.id}/recommendations`;
-  const rec = useRecommendations(initialRecs ?? null, decideUrl);
+  const rec = useRecommendations(initialRecs ?? null, decideUrl, run.graph.nodes.length);
   const src = useMemo<FrameSource>(() => ({ base: frameBase, available: frames }), [frameBase, frames]);
   const model = useMemo(() => buildModel([{ run, src }]), [run, src]);
   const colors = useMemo(() => laneColors(model), [model]);
@@ -59,7 +59,7 @@ export default function RunView({ run, frameBase, frames, sample, processedAt, c
     recs: rec.recs, model, colors, findings, filter: rfilter, setFilter: setRfilter, selectedId: rsel,
     setSelectedId: (id) => { setRsel(id); const it = rec.recs?.items.find((i) => i.id === id); if (it?.refs[0]) setSel({ nodeKey: it.refs[0].node_id ? `r${it.refs[0].rec}:${it.refs[0].node_id}` : null, findingIndex: null }); },
     applied, setApplied, zoom, selectedKey: sel.nodeKey, onSelectNode: (k) => selectNode(k),
-    canDecide: decideUrl !== null, busy: rec.busy, error: rec.error, decide: rec.decide, regenerate: rec.regenerate,
+    canDecide: decideUrl !== null, busy: rec.busy, error: rec.error, decide: rec.decide, regenerate: rec.regenerate, generating: rec.generating, screens: rec.screens,
   };
   const recCount = rec.recs?.items.length ?? 0;
 

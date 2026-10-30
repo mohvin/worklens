@@ -26,7 +26,7 @@ export default function ProcessView({ proc, recs, processedAt, recommendations: 
   const [rsel, setRsel] = useState<string | null>(null);
   const [applied, setApplied] = useState<"proposed" | "accepted">("proposed");
   const decideUrl = `/api/processes/${proc.id}/recommendations`;
-  const rec = useRecommendations(initialRecs ?? null, decideUrl);
+  const rec = useRecommendations(initialRecs ?? null, decideUrl, recs.reduce((a, r) => a + (r.run?.graph.nodes.length ?? 0), 0));
 
   const model = useMemo(() => {
     const mapRecs: MapRecording[] = proc.recordings.map((r, i) => {
@@ -59,7 +59,7 @@ export default function ProcessView({ proc, recs, processedAt, recommendations: 
     recs: rec.recs, model, colors, findings, filter: rfilter, setFilter: setRfilter, selectedId: rsel,
     setSelectedId: (id) => { setRsel(id); const it = rec.recs?.items.find((i) => i.id === id); if (it?.refs[0]) setSel({ nodeKey: it.refs[0].node_id ? `r${it.refs[0].rec}:${it.refs[0].node_id}` : null, findingIndex: null }); },
     applied, setApplied, zoom, selectedKey: sel.nodeKey, onSelectNode: (k) => selectNode(k),
-    canDecide: decideUrl !== null, busy: rec.busy, error: rec.error, decide: rec.decide, regenerate: rec.regenerate,
+    canDecide: decideUrl !== null, busy: rec.busy, error: rec.error, decide: rec.decide, regenerate: rec.regenerate, generating: rec.generating, screens: rec.screens,
   };
   const recCount = rec.recs?.items.length ?? 0;
 
