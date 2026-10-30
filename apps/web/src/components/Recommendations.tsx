@@ -39,7 +39,7 @@ export function RecList({ recs, model, filter, onFilter, selectedId, onSelect }:
             {i.status !== "proposed" && <span className={`rstatus ${i.status}`}>{i.status}</span>}
           </span>
         </span>
-        <span className="rtime">{i.seconds_raw > 0 || i.seconds_saved > 0 ? `−${fmtSeconds(i.seconds_saved)}` : i.potential_seconds > 0 ? `0–${fmtSeconds(i.potential_seconds)}` : "0 s"}<div>{i.seconds_saved > 0 ? fmtPct(i.share_saved) : i.potential_seconds > 0 ? "not counted" : i.kind === "keep_human" ? "kept" : ""}</div></span>
+        <span className="rtime">{i.seconds_saved > 0.05 ? `−${fmtSeconds(i.seconds_saved)}` : i.potential_seconds > 0 ? `0–${fmtSeconds(i.potential_seconds)}` : "0 s"}<div>{i.seconds_saved > 0.05 ? fmtPct(i.share_saved) : i.potential_seconds > 0 ? "not counted" : i.kind === "keep_human" ? "kept" : i.status === "rejected" ? "rejected" : i.seconds_raw > 0 ? "covered by items above" : ""}</div></span>
       </button>
     </li>
   );
@@ -76,7 +76,7 @@ export function RecDetail({ item, recs, model, findings, canDecide, onDecide, bu
       </div>
       <div className="rd-sec">
         <h4>Saving and method</h4>
-        <div className="rd-big">{item.seconds_saved > 0 ? `−${fmtSeconds(item.seconds_saved)}` : item.potential_seconds > 0 ? `0–${fmtSeconds(item.potential_seconds)}` : "0 s"}<small>{item.seconds_saved > 0 ? ` · ${fmtPct(item.share_saved)} of ${fmtClock(recs.summary.total_seconds)} · estimate` : item.potential_seconds > 0 ? " · potential, not counted" : item.kind === "keep_human" ? " · kept on purpose" : ""}</small></div>
+        <div className="rd-big">{item.seconds_saved > 0.05 ? `−${fmtSeconds(item.seconds_saved)}` : item.potential_seconds > 0 ? `0–${fmtSeconds(item.potential_seconds)}` : "0 s"}<small>{item.seconds_saved > 0.05 ? ` · ${fmtPct(item.share_saved)} of ${fmtClock(recs.summary.total_seconds)} · estimate` : item.potential_seconds > 0 ? " · potential, not counted" : item.kind === "keep_human" ? " · kept on purpose" : item.status === "rejected" ? " · rejected" : item.seconds_raw > 0 ? ` · the ${fmtSeconds(item.seconds_raw)} on these steps is already counted by higher-value items` : ""}</small></div>
         <code className="rd-method">{item.method}</code>
         <p>Confidence <b style={{ color: conf(item.confidence), fontWeight: 500 }}>{item.confidence}</b>. {item.rationale}</p>
       </div>
@@ -105,6 +105,7 @@ export function RecDetail({ item, recs, model, findings, canDecide, onDecide, bu
           <button className={`btn sm${item.status === "rejected" ? " on" : ""}`} disabled={!canDecide || busy} onClick={() => decide("rejected")}>Reject</button>
           <button className={`btn sm${item.status === "done" ? " on" : ""}`} disabled={!canDecide || busy} onClick={() => decide("done")}>Done</button>
           {item.status !== "proposed" && <button className="btn sm" disabled={!canDecide || busy} onClick={() => decide("proposed")}>Reset</button>}
+          {busy && <span className="hint" style={{ alignSelf: "center" }}>Saving…</span>}
         </div>
         {canDecide ? (
           <div className="rd-form">

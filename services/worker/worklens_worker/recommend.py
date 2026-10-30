@@ -39,6 +39,9 @@ FACTORS: dict[str, float] = {
     "remove_step": 1.0, "merge_steps": 1.0, "reorder": 0.0,
 }
 MECHANISMS = tuple(FACTORS.keys())
+# what the model may pick from; removing, merging and reordering steps belong to the fix path
+AI_MENU = ("document_extraction", "lookup_validation", "prefill", "drafting", "in_app_approval", "notification", "straight_through")
+AI_MENU_FALLBACK = {"remove_step": "straight_through", "merge_steps": "straight_through"}
 DECISION_RE = re.compile(r"\b(approve|approves|approval|reject|decide|decision|authori[sz]e|sign off|sign)\b", re.I)
 SEV = {"high": 0, "medium": 1, "low": 2}
 
@@ -240,7 +243,7 @@ SCHEMA = {
                 "properties": {
                     "key": {"type": "string"},
                     "disposition": {"type": "string", "enum": ["automate", "assist", "keep_human"]},
-                    "mechanism": {"type": "string", "enum": [*MECHANISMS, "none"]},
+                    "mechanism": {"type": "string", "enum": [*AI_MENU, "none"]},
                     "rationale": {"type": "string"},
                     "stays_human": {"type": "string"},
                     "guardrail": {"type": "string"},
@@ -295,7 +298,8 @@ def classify_with_model(client: LLMClient, runs: list[Run], roles: list[str], pr
                 continue
             disp = item.get("disposition")
             mech = item.get("mechanism")
-            mech = mech if mech in MECHANISMS else None
+            mech = AI_MENU_FALLBACK.get(mech, mech)
+            mech = mech if mech in AI_MENU else None
             if disp == "keep_human":
                 mech = None
             elif mech is None:
@@ -464,7 +468,7 @@ def build_recommendations(
     fix_s = sum(i.seconds_saved for i in items if i.path == "fix")
     ai_s = sum(i.seconds_saved for i in items if i.path == "ai")
     return Recommendations(
-        generated_at=_now(), rules_version=RULES_VERSION, model=model, prompt_version=PROMPT_VERSION if model else None, factors=dict(FACTORS),
+        generated_at=previous.generated_at if previous and classification is not None else _now(), rules_version=RULES_VERSION, model=model, prompt_version=PROMPT_VERSION if model else None, factors=dict(FACTORS),
         items=items, classification=classification, target=target, target_accepted=target_acc,
         summary=RecommendationsSummary(
             total_seconds=round(total, 3), fix_seconds=round(fix_s, 3), ai_seconds=round(ai_s, 3), counted_seconds=round(fix_s + ai_s, 3),
