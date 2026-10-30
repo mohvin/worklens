@@ -6,6 +6,15 @@ Process mining today needs system logs. Most work happens on screens nobody logs
 
 Built for the [Meta Global AI Developer Hackathon](https://cerebralvalley.ai/e/meta-ai-developer-hackathon), Oct 26 to Nov 4 2026, Startup track, by [PurpleAI Labs](https://purplelab.ai). All code in this repository was written during the hackathon window.
 
+## Recommendations: fix the process, apply AI
+
+Once a recording or a process is built, WorkLens says what to do about it, on two paths:
+
+* **Fix the process** (deterministic): each finding maps to a fix through a catalogue (`services/worker/worklens_worker/recommend.py`): a loop → finish the application in one visit; a second check by the next role → show the result where they work; an email handoff → approve inside the system of record; a long wait → reorder (potential only, never counted). Savings come from the measured step durations, with the method shown.
+* **Apply AI** (model-classified, rule-costed): Muse Spark classifies every screen as automate / assist / keep human with one mechanism from a fixed menu (document extraction, lookup and validation, pre-fill, drafting, in-app approval, notification, straight-through) and writes the rationale, what stays human, the guardrail and the data needed, as strict JSON. It never produces a number: savings = step duration × a documented factor per mechanism. A decision (approve, reject, authorise) is never automated. If the model is unavailable, the fix path still ships and the AI path says why it is empty.
+
+Overlapping items are counted once, highest value first; nothing exceeds the recorded total. Every item points at steps and findings with frames, carries a status (proposed / accepted / rejected / done) with who and when, and records the model and prompt version. The **Target process** view applies the proposed (or accepted) items to the same swimlane with before/after numbers. `worklens recommend --rec "AP clerk=<run>" --out <dir>` does the same from the command line.
+
 ## Record from the browser
 
 `apps/extension` is a Chrome extension (MV3): Record → work → Stop, and the recording goes straight into WorkLens with the role and process set. It also logs every tab switch so steps are tied to applications. See `apps/extension/README.md`.

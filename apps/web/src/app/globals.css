@@ -139,6 +139,62 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .handlabel { font-size: 11px; fill: var(--brand); font-weight: 600; }
 .ends { fill: var(--surface); stroke: var(--text-2); stroke-width: 2; }
 .zoom { display: flex; gap: 4px; align-self: center; padding-right: 8px; }
+.node.t-remove .box, .node.t-automate .box { fill: var(--surface-2); }
+.node.t-remove .action, .node.t-automate .action { fill: var(--text-3); text-decoration: line-through; }
+.node.t-remove image, .node.t-automate image { opacity: .45; }
+.node.t-assist .tfill { fill: url(#assist); pointer-events: none; }
+.node.t-remove .tfill, .node.t-automate .tfill { fill: none; }
+.node .ttag { fill: var(--surface); fill-opacity: .92; stroke: var(--border); }
+.node.t-automate .ttag, .node.t-assist .ttag { fill: var(--brand-soft); fill-opacity: .95; stroke: none; }
+.node .ttagtext { font-size: 9px; font-weight: 600; fill: var(--text-2); letter-spacing: .02em; }
+.node.t-automate .ttagtext, .node.t-assist .ttagtext { fill: var(--brand); }
+.node.partial .action { text-decoration: none; fill: var(--text-2); }
+.node.partial image { opacity: .8; }
+
+/* recommendations */
+.recs { display: flex; flex-direction: column; }
+.rfilter { display: flex; gap: 6px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border-2); font-size: .82rem; color: var(--text-3); }
+.rfilter .chip { cursor: pointer; }
+.rfilter .chip.on { background: var(--brand-soft); color: var(--brand); border-color: transparent; }
+.rfilter .hint { margin-left: auto; }
+.rlist { list-style: none; margin: 0; padding: 0; }
+.rrow { border-top: 1px solid var(--border-2); }
+.rrow > button { width: 100%; text-align: left; display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; padding: 10px 12px; align-items: start; }
+.rrow > button:hover { background: var(--surface-2); }
+.rrow.sel > button { background: var(--brand-soft); }
+.rrow.off { opacity: .55; }
+.rrow .rank { color: var(--text-3); font-size: .82rem; padding-top: 2px; }
+.rmain { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rtitle { font-weight: 500; line-height: 1.3; }
+.rmeta { display: flex; gap: 8px; flex-wrap: wrap; font-size: .8rem; color: var(--text-3); align-items: center; }
+.rtag { color: var(--text); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 3px; padding: 0 6px; font-size: .76rem; }
+.rtag.automate { background: var(--brand); color: #fff; border-color: transparent; }
+.rtag.assist { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+.rtag.keep_human { background: var(--surface-2); }
+.rstatus { font-weight: 600; text-transform: uppercase; font-size: .72rem; letter-spacing: .03em; }
+.rstatus.accepted, .rstatus.done { color: var(--success); } .rstatus.rejected { color: var(--danger); }
+.rtime { font-weight: 600; text-align: right; white-space: nowrap; }
+.rtime div { font-size: .76rem; color: var(--text-3); font-weight: 400; }
+.rfoot { padding: 10px 12px; border-top: 1px solid var(--border-2); font-size: .8rem; color: var(--text-3); }
+.rdet { font-size: .9rem; }
+.rd-sec { padding: 12px 14px; border-bottom: 1px solid var(--border-2); }
+.rd-sec:last-child { border-bottom: 0; }
+.rdet h3 { margin: 0 0 4px; font-size: 1rem; font-weight: 600; line-height: 1.3; }
+.rdet h4 { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); margin: 0 0 6px; }
+.rdet p { margin: 6px 0 0; color: var(--text-2); font-size: .88rem; }
+.rd-big { font-size: 1.4rem; font-weight: 600; letter-spacing: -.02em; }
+.rd-big small { font-size: .8rem; font-weight: 400; color: var(--text-3); }
+.rd-method { display: block; margin-top: 6px; font-family: var(--mono); font-size: .78rem; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 4px; padding: 6px 8px; white-space: pre-wrap; }
+.rd-findings { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: .84rem; color: var(--text-2); }
+.rd-findings b { font-weight: 500; color: var(--text); }
+.rd-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.rd-form label { display: flex; flex-direction: column; gap: 4px; font-size: .78rem; color: var(--text-3); }
+.rd-form input { font: inherit; font-size: .88rem; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); height: 32px; padding: 0 10px; min-width: 0; }
+.prov-line { font-size: .78rem; color: var(--text-3); margin-top: 10px; }
+.kpi .arrow { color: var(--text-3); font-weight: 400; } .kpi .good { color: var(--success); }
+.ba .balabel { font-size: 12px; font-family: var(--mono); fill: var(--text); } .ba .balabel.good { fill: var(--success); font-weight: 600; }
+.wc .flist .rank { font-size: .72rem; font-weight: 600; }
+.wc .card-h h2 { font-size: .9rem; }
 
 /* steps table */
 .table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }

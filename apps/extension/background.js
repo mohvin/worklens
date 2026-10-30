@@ -84,9 +84,9 @@ async function api(base, path, body) {
 async function start({ role, processId, newProcessName }) {
   const s = await getState();
   if (s.phase !== "idle" && s.phase !== "done" && s.phase !== "error") return s;
-  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
   await ensureOffscreen();
-  const streamId = await new Promise((resolve) => chrome.desktopCapture.chooseDesktopMedia(["screen", "window", "tab"], tab, (id) => resolve(id)));
+  // No target tab: the stream must be usable by the extension's own offscreen page, not by the site in the current tab.
+  const streamId = await new Promise((resolve) => chrome.desktopCapture.chooseDesktopMedia(["screen", "window", "tab"], (id) => resolve(id)));
   if (!streamId) { await closeOffscreen(); return setState({ ...INITIAL, base: s.base, role, processId, newProcessName }); }
   await setState({ ...INITIAL, base: s.base, phase: "recording", role, processId, newProcessName, startedAt: Date.now(), tabLog: [], current: null });
   await toOffscreen({ type: "os-start", streamId });

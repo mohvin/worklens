@@ -68,7 +68,7 @@ class Step(BaseModel):
 class ModelCall(BaseModel):
     """One request to a Meta model, for the cost log and the replay cache."""
 
-    stage: Literal["label", "segment"]
+    stage: Literal["label", "segment", "recommend"]
     model: str
     cache_key: str
     cached: bool
@@ -218,3 +218,118 @@ class Process(BaseModel):
     handoffs: list[Handoff] = Field(default_factory=list)
     findings: list[ProcessFinding] = Field(default_factory=list, description="Findings across roles; each recording keeps its own findings in its Run")
     summary: ProcessSummary = Field(default_factory=ProcessSummary)
+
+
+# ---- recommendations: fix the process (rules) and apply AI (model-classified, rule-costed) ----
+
+Mechanism = Literal[
+    "document_extraction", "lookup_validation", "prefill", "drafting", "in_app_approval",
+    "notification", "straight_through", "remove_step", "merge_steps", "reorder",
+]
+Disposition = Literal["keep", "automate", "assist", "remove"]
+
+
+class StepSaving(BaseModel):
+    """How much of one step a recommendation takes away, after overlaps with higher-value items."""
+
+    ref: Ref
+    seconds_before: float
+    seconds_raw: float = Field(description="What this item alone would save on the step")
+    seconds_counted: float = Field(description="What is counted after earlier items took their share")
+
+
+class Recommendation(BaseModel):
+    id: str
+    path: Literal["fix", "ai"]
+    kind: Literal["remove", "merge", "move", "automate", "assist", "keep_human"]
+    mechanism: Mechanism | None = None
+    title: str
+    detail: str = Field(description="What to change")
+    rationale: str = Field(description="Why, with the evidence")
+    refs: list[Ref] = Field(default_factory=list, description="Steps the recommendation applies to")
+    finding_keys: list[str] = Field(default_factory=list, description="Findings it resolves: 'r0:f1' (run 0, finding 1) or 'p:f0' (process)")
+    evidence: list[FrameRef] = Field(default_factory=list)
+    seconds_saved: float = Field(default=0.0, description="Counted saving after overlaps, per run of the process")
+    seconds_raw: float = Field(default=0.0, description="Saving before overlaps")
+    potential_seconds: float = Field(default=0.0, description="Upper bound when the saving is not counted (low confidence)")
+    method: str = Field(default="", description="How the number was made, e.g. '(C3 8 s + C5 17 s) x 0.8 = 20 s'")
+    share_saved: float = 0.0
+    confidence: Literal["high", "medium", "low"] = "medium"
+    factor: float | None = Field(default=None, description="Automation factor applied to the steps' durations")
+    savings: list[StepSaving] = Field(default_factory=list)
+    depends_on: list[str] = Field(default_factory=list)
+    stays_human: str | None = None
+    guardrail: str | None = None
+    data_needed: list[str] = Field(default_factory=list)
+    status: Literal["proposed", "accepted", "rejected", "done"] = "proposed"
+    decided_by: str | None = None
+    decided_at: str | None = None
+    note: str | None = None
+    source: Literal["rule", "model"] = "rule"
+    model: str | None = None
+    prompt_version: str | None = None
+
+
+class TargetStep(BaseModel):
+    ref: Ref
+    application: str
+    action: str
+    disposition: Disposition = "keep"
+    recommendation_ids: list[str] = Field(default_factory=list)
+    seconds_before: float
+    seconds_after: float
+
+
+class Target(BaseModel):
+    applied: Literal["proposed", "accepted"] = Field(default="proposed", description="proposed: every item not rejected; accepted: accepted and done only")
+    steps: list[TargetStep] = Field(default_factory=list)
+    seconds_before: float = 0.0
+    seconds_after: float = 0.0
+    steps_before: int = 0
+    steps_after: int = 0
+    app_switches_before: int = 0
+    app_switches_after: int = 0
+    handoffs_before: int = 0
+    handoffs_after: int = 0
+    handoff_in_app: bool = False
+    human_decisions_kept: int = 0
+
+
+class AIClassification(BaseModel):
+    """What the model said about one screen; kept so the numbers can be recomputed without a new call."""
+
+    key: str = Field(description="r<rec>:<node id>")
+    disposition: Literal["automate", "assist", "keep_human"]
+    mechanism: Mechanism | None = None
+    rationale: str = ""
+    stays_human: str = ""
+    guardrail: str = ""
+    data_needed: list[str] = Field(default_factory=list)
+    confidence: Literal["high", "medium", "low"] = "medium"
+
+
+class RecommendationsSummary(BaseModel):
+    total_seconds: float = 0.0
+    fix_seconds: float = 0.0
+    ai_seconds: float = 0.0
+    counted_seconds: float = 0.0
+    share: float = 0.0
+    proposed: int = 0
+    accepted: int = 0
+    rejected: int = 0
+    done: int = 0
+    ai_unavailable: str | None = Field(default=None, description="Why the AI path has no model items, when it has none")
+
+
+class Recommendations(BaseModel):
+    version: str = "rec-v1"
+    generated_at: str
+    rules_version: str = "v3"
+    model: str | None = None
+    prompt_version: str | None = None
+    factors: dict[str, float] = Field(default_factory=dict)
+    items: list[Recommendation] = Field(default_factory=list)
+    classification: list[AIClassification] = Field(default_factory=list)
+    target: Target = Field(default_factory=Target)
+    target_accepted: Target = Field(default_factory=Target)
+    summary: RecommendationsSummary = Field(default_factory=RecommendationsSummary)

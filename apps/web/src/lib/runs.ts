@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { Process, Run } from "./types";
+import type { Process, Recommendations, Run } from "./types";
 import { SAMPLES } from "@/generated/samples";
 import { getProcessRow, getRunRow, listProcessRows, listRunRows, listRunsOfProcess, supabaseConfigured, type ProcessRow } from "./supabase";
 
@@ -23,6 +23,8 @@ export interface LoadedRun {
   frames: number[] | null;     // frame indexes that exist, or null when all do
   processedAt?: string;        // hosted runs: when the pipeline finished
   process?: { id: string; name: string; role: string | null } | null;   // hosted runs that belong to a process
+  recs?: Recommendations | null;                                        // recommendations, when generated
+  role?: string | null;
 }
 
 export interface RunListing { id: string; source: string; duration: number; status: string; findings: number; mtime: number; kind: Source; role?: string | null; processId?: string | null }
@@ -60,7 +62,7 @@ async function loadLocal(id: string): Promise<LoadedRun | null> {
 export async function getRun(id: string): Promise<LoadedRun | null> {
   if (!ID_RE.test(id)) return null;
   const s = SAMPLES[id];
-  if (s) return { run: s.run, pending: null, source: "sample", frameBase: `/samples/${id}/frames`, frames: s.frames };
+  if (s) return { run: s.run, pending: null, source: "sample", frameBase: `/samples/${id}/frames`, frames: s.frames, recs: s.recs ?? null };
   if (supabaseConfigured()) {
     const row = await getRunRow(id);
     if (row) {
@@ -71,7 +73,7 @@ export async function getRun(id: string): Promise<LoadedRun | null> {
         if (pr) process = { id: pr.id, name: pr.name, role: row.role ?? null };
       }
       if (row.status === "built" && row.run_json) {
-        return { run: row.run_json as Run, pending: null, source: "hosted", frameBase: `/api/runs/${id}/frames`, frames, processedAt: new Date(row.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }), process };
+        return { run: row.run_json as Run, pending: null, source: "hosted", frameBase: `/api/runs/${id}/frames`, frames, processedAt: new Date(row.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }), process, recs: (row.recommendations_json as Recommendations | null) ?? null, role: row.role ?? null };
       }
       return {
         run: null,
@@ -91,7 +93,7 @@ export async function runFile(id: string, rel: string): Promise<Buffer | null> {
 // ---- processes: several hosted runs, one per role ----
 
 export interface ProcessRec { id: string; role: string; source: string; status: string; error: string | null; run: Run | null; frameBase: string; frames: number[] | null }
-export interface LoadedProcess { row: ProcessRow; proc: Process | null; recs: ProcessRec[] }
+export interface LoadedProcess { row: ProcessRow; proc: Process | null; recs: ProcessRec[]; recommendations: Recommendations | null }
 
 export async function getProcess(id: string): Promise<LoadedProcess | null> {
   if (!ID_RE.test(id) || !supabaseConfigured()) return null;
@@ -103,7 +105,7 @@ export async function getProcess(id: string): Promise<LoadedProcess | null> {
     run: r.status === "built" && r.run_json ? (r.run_json as Run) : null,
     frameBase: `/api/runs/${r.id}/frames`, frames: (r.progress as { frames_available?: number[] }).frames_available ?? null,
   }));
-  return { row, proc: row.status === "built" && row.process_json ? (row.process_json as Process) : null, recs };
+  return { row, proc: row.status === "built" && row.process_json ? (row.process_json as Process) : null, recs, recommendations: (row.recommendations_json as Recommendations | null) ?? null };
 }
 
 export interface ProcessListing { id: string; name: string; status: string; mtime: number; recs: { id: string; role: string; source: string; status: string }[] }

@@ -14,12 +14,12 @@ function headers(extra: Record<string, string> = {}): Record<string, string> {
 export interface RunRow {
   id: string; source: string; size_bytes: number; status: string; progress: Record<string, unknown>;
   error: string | null; run_json: unknown | null; cost_usd: number; created_at: string; updated_at: string;
-  process_id?: string | null; role?: string | null; position?: number;
+  process_id?: string | null; role?: string | null; position?: number; recommendations_json?: unknown | null;
 }
 
 export interface ProcessRow {
   id: string; name: string; status: "created" | "building" | "built" | "failed"; process_json: unknown | null;
-  error: string | null; created_at: string; updated_at: string;
+  error: string | null; created_at: string; updated_at: string; recommendations_json?: unknown | null;
 }
 
 export async function getRunRow(id: string, select = "*"): Promise<RunRow | null> {

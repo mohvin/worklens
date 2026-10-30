@@ -137,6 +137,42 @@ def process(
 
 
 @app.command()
+def recommend(
+    rec: list[str] = typer.Option(..., "--rec", help="role=run_id (or run directory), in handoff order; one for a single recording"),
+    out: Path = typer.Option(..., help="Directory to write recommendations.json into (and process.json when several recordings)"),
+    no_model: bool = typer.Option(False, "--no-model", help="Fix path only, no Muse Spark call"),
+    runs_dir: Path | None = typer.Option(None),
+) -> None:
+    """Recommend fixes (rules) and where to apply AI (Muse Spark classifies, rules cost). Writes recommendations.json."""
+    from .recommend import build_recommendations, recommend_client
+
+    _load_env()
+    store = _store(runs_dir)
+    roles: list[str] = []
+    runs: list[Run] = []
+    for item in rec:
+        role, ref = item.split("=", 1) if "=" in item else ("Recording", item)
+        path = Path(ref)
+        runs.append(Run.model_validate_json((path / "run.json").read_text()) if path.is_dir() else store.load(ref))
+        roles.append(role.strip())
+    proc = build_process(out.name, out.name, runs, roles) if len(runs) > 1 else None
+    out.mkdir(parents=True, exist_ok=True)
+    client = None if no_model else recommend_client(out / "cache")
+    recs = build_recommendations(runs, roles, proc, client=client)
+    (out / "recommendations.json").write_text(json.dumps(recs.model_dump(), indent=2))
+    if proc:
+        (out / "process.json").write_text(json.dumps(proc.model_dump(), indent=2))
+    s = recs.summary
+    typer.echo(f"{len(recs.items)} recommendations · fix {s.fix_seconds:.0f} s · ai {s.ai_seconds:.0f} s · counted {s.counted_seconds:.0f} s of {s.total_seconds:.0f} s ({s.share:.0%})")
+    if s.ai_unavailable:
+        typer.echo(f"  AI path unavailable: {s.ai_unavailable}")
+    for i in recs.items:
+        typer.echo(f"  [{i.path:3}] {i.title} — {i.seconds_saved:.0f} s ({i.confidence})")
+    typer.echo(f"  target: {recs.target.seconds_before:.0f} s -> {recs.target.seconds_after:.0f} s, steps {recs.target.steps_before} -> {recs.target.steps_after}")
+    typer.echo(f"wrote {out / 'recommendations.json'}")
+
+
+@app.command()
 def schema() -> None:
     """Write the JSON schema of a Run to packages/schema/run.schema.json."""
     out = REPO_ROOT / "packages" / "schema" / "run.schema.json"

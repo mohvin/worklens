@@ -11,14 +11,22 @@ import Timeline, { type Selection } from "./Timeline";
 import ProcessMap from "./ProcessMap";
 import StepsTable from "./StepsTable";
 import Inspector from "./Inspector";
+import { RecMain, RecSide, useRecommendations, type RecState } from "./RecTabs";
+import type { Recommendations } from "@/lib/types";
+import type { Filter } from "./Recommendations";
 
-interface Props { proc: Process; recs: ProcessRec[]; processedAt?: string | null }
+interface Props { proc: Process; recs: ProcessRec[]; processedAt?: string | null; recommendations?: Recommendations | null }
 
-export default function ProcessView({ proc, recs, processedAt }: Props) {
+export default function ProcessView({ proc, recs, processedAt, recommendations: initialRecs }: Props) {
   const [sel, setSel] = useState<Selection>({ nodeKey: null, findingIndex: null });
-  const [tab, setTab] = useState<"map" | "steps">("map");
+  const [tab, setTab] = useState<"map" | "steps" | "recs" | "target">("map");
   const [itab, setItab] = useState<"findings" | "step">("findings");
   const [zoom, setZoom] = useState<"fit" | 1>(1);
+  const [rfilter, setRfilter] = useState<Filter>("all");
+  const [rsel, setRsel] = useState<string | null>(null);
+  const [applied, setApplied] = useState<"proposed" | "accepted">("proposed");
+  const decideUrl = `/api/processes/${proc.id}/recommendations`;
+  const rec = useRecommendations(initialRecs ?? null, decideUrl);
 
   const model = useMemo(() => {
     const mapRecs: MapRecording[] = proc.recordings.map((r, i) => {
@@ -47,6 +55,14 @@ export default function ProcessView({ proc, recs, processedAt }: Props) {
     setItab("findings");
   };
 
+  const recState: RecState = {
+    recs: rec.recs, model, colors, findings, filter: rfilter, setFilter: setRfilter, selectedId: rsel,
+    setSelectedId: (id) => { setRsel(id); const it = rec.recs?.items.find((i) => i.id === id); if (it?.refs[0]) setSel({ nodeKey: it.refs[0].node_id ? `r${it.refs[0].rec}:${it.refs[0].node_id}` : null, findingIndex: null }); },
+    applied, setApplied, zoom, selectedKey: sel.nodeKey, onSelectNode: (k) => selectNode(k),
+    canDecide: decideUrl !== null, busy: rec.busy, error: rec.error, decide: rec.decide, regenerate: rec.regenerate,
+  };
+  const recCount = rec.recs?.items.length ?? 0;
+
   return (
     <main className="page">
       <nav className="crumbs" aria-label="Breadcrumb"><Link href="/">Runs</Link><span>›</span><span>{proc.name}</span></nav>
@@ -62,6 +78,7 @@ export default function ProcessView({ proc, recs, processedAt }: Props) {
         <div className="actions">
           <a className="btn" href={`/api/processes/${proc.id}/export?format=json`}>Export JSON</a>
           <a className="btn" href={`/api/processes/${proc.id}/export?format=bpmn`}>Export BPMN</a>
+          {rec.recs && <a className="btn" href={`/api/processes/${proc.id}/recommendations?download=1`}>Export recommendations</a>}
         </div>
       </div>
 
@@ -84,12 +101,16 @@ export default function ProcessView({ proc, recs, processedAt }: Props) {
             <div className="tabs" role="tablist">
               <button className="tab" role="tab" aria-selected={tab === "map"} onClick={() => setTab("map")}>Process map</button>
               <button className="tab" role="tab" aria-selected={tab === "steps"} onClick={() => setTab("steps")}>Steps <span className="n">{proc.summary.steps}</span></button>
+              <button className="tab" role="tab" aria-selected={tab === "recs"} onClick={() => setTab("recs")}>Recommendations {recCount > 0 && <span className="n">{recCount}</span>}</button>
+              <button className="tab" role="tab" aria-selected={tab === "target"} onClick={() => setTab("target")}>Target process</button>
               <span style={{ flex: 1 }} />
               {tab === "map" && <span className="hint" style={{ fontSize: ".82rem", color: "var(--text-3)", alignSelf: "center", paddingRight: 8 }}>columns are applications · one band per role · dashed purple arrow is the handoff</span>}
               {tab === "map" && <span className="zoom"><button className={`btn sm${zoom === "fit" ? " on" : ""}`} onClick={() => setZoom("fit")}>Fit</button><button className={`btn sm${zoom === 1 ? " on" : ""}`} onClick={() => setZoom(1)}>100%</button></span>}
             </div>
             {tab === "map" ? (
               <ProcessMap model={model} colors={colors} selectedKey={sel.nodeKey} hotKeys={hotKeys} zoom={zoom} onSelect={(key) => selectNode(key)} />
+            ) : tab === "recs" || tab === "target" ? (
+              <RecMain tab={tab} st={recState} />
             ) : (
               <div style={{ overflowX: "auto" }}>
                 {model.recs.map((r, i) => (
@@ -103,7 +124,7 @@ export default function ProcessView({ proc, recs, processedAt }: Props) {
           </section>
         </div>
 
-        <Inspector model={model} findings={findings} colors={colors} tab={itab} onTab={setItab} selection={sel} onSelectNode={selectNode} onSelectFinding={selectFinding} labelModel={labelModel} segModel={segModel} />
+        {tab === "recs" || tab === "target" ? <RecSide tab={tab} st={recState} /> : <Inspector model={model} findings={findings} colors={colors} tab={itab} onTab={setItab} selection={sel} onSelectNode={selectNode} onSelectFinding={selectFinding} labelModel={labelModel} segModel={segModel} />}
       </div>
       <footer className="foot"><span>Each recording processed on its own (pixel-diff, {segModel ?? "SAM 3.1"}, {labelModel ?? "Muse Spark"}) · handoffs and findings across roles matched on shared identifiers, deterministic</span></footer>
     </main>

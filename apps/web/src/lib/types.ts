@@ -62,3 +62,33 @@ export interface Process {
   id: string; name: string; status: "created" | "building" | "built" | "failed";
   recordings: Recording[]; handoffs: Handoff[]; findings: ProcessFinding[]; summary: ProcessSummary;
 }
+
+// ---- recommendations: fix the process (rules) and apply AI (model-classified, rule-costed) ----
+export type Mechanism = "document_extraction" | "lookup_validation" | "prefill" | "drafting" | "in_app_approval" | "notification" | "straight_through" | "remove_step" | "merge_steps" | "reorder";
+export type Disposition = "keep" | "automate" | "assist" | "remove";
+export type RecStatus = "proposed" | "accepted" | "rejected" | "done";
+export interface StepSaving { ref: Ref; seconds_before: number; seconds_raw: number; seconds_counted: number }
+export interface Recommendation {
+  id: string; path: "fix" | "ai"; kind: "remove" | "merge" | "move" | "automate" | "assist" | "keep_human"; mechanism: Mechanism | null;
+  title: string; detail: string; rationale: string; refs: Ref[]; finding_keys: string[]; evidence: FrameRef[];
+  seconds_saved: number; seconds_raw: number; potential_seconds: number; method: string; share_saved: number;
+  confidence: "high" | "medium" | "low"; factor: number | null; savings: StepSaving[];
+  depends_on: string[]; stays_human: string | null; guardrail: string | null; data_needed: string[];
+  status: RecStatus; decided_by: string | null; decided_at: string | null; note: string | null;
+  source: "rule" | "model"; model: string | null; prompt_version: string | null;
+}
+export interface TargetStep { ref: Ref; application: string; action: string; disposition: Disposition; recommendation_ids: string[]; seconds_before: number; seconds_after: number }
+export interface Target {
+  applied: "proposed" | "accepted"; steps: TargetStep[]; seconds_before: number; seconds_after: number; steps_before: number; steps_after: number;
+  app_switches_before: number; app_switches_after: number; handoffs_before: number; handoffs_after: number; handoff_in_app: boolean; human_decisions_kept: number;
+}
+export interface RecommendationsSummary { total_seconds: number; fix_seconds: number; ai_seconds: number; counted_seconds: number; share: number; proposed: number; accepted: number; rejected: number; done: number; ai_unavailable: string | null }
+export interface Recommendations {
+  version: string; generated_at: string; rules_version: string; model: string | null; prompt_version: string | null; factors: Record<string, number>;
+  items: Recommendation[]; classification: unknown[]; target: Target; target_accepted: Target; summary: RecommendationsSummary;
+}
+export const mechanismLabel: Record<Mechanism, string> = {
+  document_extraction: "Document extraction", lookup_validation: "Lookup and validation", prefill: "Pre-fill", drafting: "Drafting",
+  in_app_approval: "In-app approval", notification: "Notification", straight_through: "Straight-through", remove_step: "Remove step", merge_steps: "Merge steps", reorder: "Reorder",
+};
+export const kindLabel: Record<Recommendation["kind"], string> = { remove: "Remove", merge: "Merge", move: "Reorder", automate: "Automate", assist: "Assist", keep_human: "Keep human" };

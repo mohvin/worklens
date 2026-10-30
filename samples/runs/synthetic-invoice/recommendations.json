@@ -1,0 +1,635 @@
+{
+  "version": "rec-v1",
+  "generated_at": "2026-10-30T17:50:36+00:00",
+  "rules_version": "v3",
+  "model": null,
+  "prompt_version": null,
+  "factors": {
+    "document_extraction": 0.8,
+    "lookup_validation": 0.9,
+    "straight_through": 0.95,
+    "prefill": 0.6,
+    "drafting": 0.5,
+    "notification": 0.3,
+    "in_app_approval": 1.0,
+    "remove_step": 1.0,
+    "merge_steps": 1.0,
+    "reorder": 0.0
+  },
+  "items": [
+    {
+      "id": "fix-r0:f1",
+      "path": "fix",
+      "kind": "merge",
+      "mechanism": "merge_steps",
+      "title": "Finish in Mail before moving on: one visit instead of 2",
+      "detail": "Batch what is done in the same application so it is visited once per task; the return trip is the cost.",
+      "rationale": "The user left Mail and came back 1 time; the return trip cost 15 s (16%). Screens seen again: select invoice email. Detour via PDF Viewer \u2192 ERP - Accounts Payable \u2192 Sheets \u2192 ERP - Accounts Payable.",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 8,
+          "node_id": "n1"
+        },
+        {
+          "rec": 0,
+          "step": 9,
+          "node_id": "n8"
+        },
+        {
+          "rec": 0,
+          "step": 10,
+          "node_id": "n9"
+        },
+        {
+          "rec": 0,
+          "step": 11,
+          "node_id": "n10"
+        }
+      ],
+      "finding_keys": [
+        "r0:f1"
+      ],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 0
+        },
+        {
+          "rec": 0,
+          "frame": 80
+        }
+      ],
+      "seconds_saved": 15.0,
+      "seconds_raw": 15.0,
+      "potential_seconds": 0.0,
+      "method": "return trip 15 s across step 8, step 9, step 10, step 11",
+      "share_saved": 0.1579,
+      "confidence": "medium",
+      "factor": null,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 8,
+            "node_id": "n1"
+          },
+          "seconds_before": 3.0,
+          "seconds_raw": 3.0,
+          "seconds_counted": 3.0
+        },
+        {
+          "ref": {
+            "rec": 0,
+            "step": 9,
+            "node_id": "n8"
+          },
+          "seconds_before": 2.0,
+          "seconds_raw": 2.0,
+          "seconds_counted": 2.0
+        },
+        {
+          "ref": {
+            "rec": 0,
+            "step": 10,
+            "node_id": "n9"
+          },
+          "seconds_before": 6.0,
+          "seconds_raw": 6.0,
+          "seconds_counted": 6.0
+        },
+        {
+          "ref": {
+            "rec": 0,
+            "step": 11,
+            "node_id": "n10"
+          },
+          "seconds_before": 4.0,
+          "seconds_raw": 4.0,
+          "seconds_counted": 4.0
+        }
+      ],
+      "depends_on": [
+        "the task order allows finishing the first application in one go"
+      ],
+      "stays_human": null,
+      "guardrail": null,
+      "data_needed": [],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "rule",
+      "model": null,
+      "prompt_version": null
+    },
+    {
+      "id": "fix-r0:f3",
+      "path": "fix",
+      "kind": "remove",
+      "mechanism": "lookup_validation",
+      "title": "Show the Sheets value inside ERP - Accounts Payable, so nobody checks it by hand",
+      "detail": "Surface the checked value where the work happens (a lookup or a linked field), so the switch to Sheets is not needed.",
+      "rationale": "1 switch from ERP - Accounts Payable to Sheets with the same values on both screens (Acme Supplies Ltd, PO-7731). 9 s spent checking data that already exists in ERP - Accounts Payable.",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 5,
+          "node_id": "n5"
+        },
+        {
+          "rec": 0,
+          "step": 6,
+          "node_id": "n6"
+        }
+      ],
+      "finding_keys": [
+        "r0:f3"
+      ],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 57
+        },
+        {
+          "rec": 0,
+          "frame": 58
+        }
+      ],
+      "seconds_saved": 9.0,
+      "seconds_raw": 9.0,
+      "potential_seconds": 0.0,
+      "method": "step 6 9 s",
+      "share_saved": 0.0947,
+      "confidence": "medium",
+      "factor": null,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 5,
+            "node_id": "n5"
+          },
+          "seconds_before": 17.0,
+          "seconds_raw": 5.885,
+          "seconds_counted": 5.885
+        },
+        {
+          "ref": {
+            "rec": 0,
+            "step": 6,
+            "node_id": "n6"
+          },
+          "seconds_before": 9.0,
+          "seconds_raw": 3.115,
+          "seconds_counted": 3.115
+        }
+      ],
+      "depends_on": [
+        "ERP - Accounts Payable can show or link the Sheets value"
+      ],
+      "stays_human": null,
+      "guardrail": null,
+      "data_needed": [],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "rule",
+      "model": null,
+      "prompt_version": null
+    },
+    {
+      "id": "fix-r0:f2",
+      "path": "fix",
+      "kind": "move",
+      "mechanism": "reorder",
+      "title": "Open ERP - Accounts Payable before the previous step, so it loads while you read",
+      "detail": "Start the ERP - Accounts Payable screen first and go back to the document while it loads; or ask IT why it takes 21 s.",
+      "rationale": "21 s of waiting on ERP - Accounts Payable at step 4, 22% of that recording. Reordering may hide the wait; the real fix is the system's load time, which this recording cannot prove.",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 4,
+          "node_id": "n4"
+        }
+      ],
+      "finding_keys": [
+        "r0:f2"
+      ],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 20
+        },
+        {
+          "rec": 0,
+          "frame": 30
+        },
+        {
+          "rec": 0,
+          "frame": 40
+        }
+      ],
+      "seconds_saved": 0.0,
+      "seconds_raw": 0.0,
+      "potential_seconds": 21.0,
+      "method": "step 4 wait 21 s: potential, not counted",
+      "share_saved": 0.0,
+      "confidence": "low",
+      "factor": null,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 4,
+            "node_id": "n4"
+          },
+          "seconds_before": 21.0,
+          "seconds_raw": 0.0,
+          "seconds_counted": 0.0
+        }
+      ],
+      "depends_on": [
+        "ERP - Accounts Payable load time measured on more recordings"
+      ],
+      "stays_human": null,
+      "guardrail": null,
+      "data_needed": [],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "rule",
+      "model": null,
+      "prompt_version": null
+    }
+  ],
+  "classification": [],
+  "target": {
+    "applied": "proposed",
+    "steps": [
+      {
+        "ref": {
+          "rec": 0,
+          "step": 0,
+          "node_id": "n1"
+        },
+        "application": "Mail",
+        "action": "select invoice email",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 4.0,
+        "seconds_after": 4.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 1,
+          "node_id": "n1"
+        },
+        "application": "Mail",
+        "action": "select invoice email",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 2.0,
+        "seconds_after": 2.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 2,
+          "node_id": "n2"
+        },
+        "application": "Mail",
+        "action": "open attachment",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 6.0,
+        "seconds_after": 6.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 3,
+          "node_id": "n3"
+        },
+        "application": "PDF Viewer",
+        "action": "read invoice PDF",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 8.0,
+        "seconds_after": 8.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 4,
+          "node_id": "n4"
+        },
+        "application": "ERP - Accounts Payable",
+        "action": "wait for invoice form to load",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 21.0,
+        "seconds_after": 21.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 5,
+          "node_id": "n5"
+        },
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form",
+        "disposition": "remove",
+        "recommendation_ids": [
+          "fix-r0:f3"
+        ],
+        "seconds_before": 17.0,
+        "seconds_after": 11.115
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 6,
+          "node_id": "n6"
+        },
+        "application": "Sheets",
+        "action": "check PO in register",
+        "disposition": "remove",
+        "recommendation_ids": [
+          "fix-r0:f3"
+        ],
+        "seconds_before": 9.0,
+        "seconds_after": 5.885
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 7,
+          "node_id": "n7"
+        },
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form and submit",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 13.0,
+        "seconds_after": 13.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 8,
+          "node_id": "n1"
+        },
+        "application": "Mail",
+        "action": "select invoice email",
+        "disposition": "remove",
+        "recommendation_ids": [
+          "fix-r0:f1"
+        ],
+        "seconds_before": 3.0,
+        "seconds_after": 0.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 9,
+          "node_id": "n8"
+        },
+        "application": "Mail",
+        "action": "click Reply",
+        "disposition": "remove",
+        "recommendation_ids": [
+          "fix-r0:f1"
+        ],
+        "seconds_before": 2.0,
+        "seconds_after": 0.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 10,
+          "node_id": "n9"
+        },
+        "application": "Mail",
+        "action": "send approval reply",
+        "disposition": "remove",
+        "recommendation_ids": [
+          "fix-r0:f1"
+        ],
+        "seconds_before": 6.0,
+        "seconds_after": 0.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 11,
+          "node_id": "n10"
+        },
+        "application": "Mail",
+        "action": "view approval reply",
+        "disposition": "remove",
+        "recommendation_ids": [
+          "fix-r0:f1"
+        ],
+        "seconds_before": 4.0,
+        "seconds_after": 0.0
+      }
+    ],
+    "seconds_before": 95.0,
+    "seconds_after": 71.0,
+    "steps_before": 12,
+    "steps_after": 8,
+    "app_switches_before": 5,
+    "app_switches_after": 4,
+    "handoffs_before": 0,
+    "handoffs_after": 0,
+    "handoff_in_app": false,
+    "human_decisions_kept": 0
+  },
+  "target_accepted": {
+    "applied": "accepted",
+    "steps": [
+      {
+        "ref": {
+          "rec": 0,
+          "step": 0,
+          "node_id": "n1"
+        },
+        "application": "Mail",
+        "action": "select invoice email",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 4.0,
+        "seconds_after": 4.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 1,
+          "node_id": "n1"
+        },
+        "application": "Mail",
+        "action": "select invoice email",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 2.0,
+        "seconds_after": 2.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 2,
+          "node_id": "n2"
+        },
+        "application": "Mail",
+        "action": "open attachment",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 6.0,
+        "seconds_after": 6.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 3,
+          "node_id": "n3"
+        },
+        "application": "PDF Viewer",
+        "action": "read invoice PDF",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 8.0,
+        "seconds_after": 8.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 4,
+          "node_id": "n4"
+        },
+        "application": "ERP - Accounts Payable",
+        "action": "wait for invoice form to load",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 21.0,
+        "seconds_after": 21.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 5,
+          "node_id": "n5"
+        },
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 17.0,
+        "seconds_after": 17.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 6,
+          "node_id": "n6"
+        },
+        "application": "Sheets",
+        "action": "check PO in register",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 9.0,
+        "seconds_after": 9.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 7,
+          "node_id": "n7"
+        },
+        "application": "ERP - Accounts Payable",
+        "action": "fill invoice form and submit",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 13.0,
+        "seconds_after": 13.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 8,
+          "node_id": "n1"
+        },
+        "application": "Mail",
+        "action": "select invoice email",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 3.0,
+        "seconds_after": 3.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 9,
+          "node_id": "n8"
+        },
+        "application": "Mail",
+        "action": "click Reply",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 2.0,
+        "seconds_after": 2.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 10,
+          "node_id": "n9"
+        },
+        "application": "Mail",
+        "action": "send approval reply",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 6.0,
+        "seconds_after": 6.0
+      },
+      {
+        "ref": {
+          "rec": 0,
+          "step": 11,
+          "node_id": "n10"
+        },
+        "application": "Mail",
+        "action": "view approval reply",
+        "disposition": "keep",
+        "recommendation_ids": [],
+        "seconds_before": 4.0,
+        "seconds_after": 4.0
+      }
+    ],
+    "seconds_before": 95.0,
+    "seconds_after": 95.0,
+    "steps_before": 12,
+    "steps_after": 12,
+    "app_switches_before": 5,
+    "app_switches_after": 5,
+    "handoffs_before": 0,
+    "handoffs_after": 0,
+    "handoff_in_app": false,
+    "human_decisions_kept": 2
+  },
+  "summary": {
+    "total_seconds": 95.0,
+    "fix_seconds": 24.0,
+    "ai_seconds": 0.0,
+    "counted_seconds": 24.0,
+    "share": 0.2526,
+    "proposed": 3,
+    "accepted": 0,
+    "rejected": 0,
+    "done": 0,
+    "ai_unavailable": "no model configured for the AI path"
+  }
+}

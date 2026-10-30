@@ -12,11 +12,12 @@ import type { MapModel, MapNode } from "@/lib/model";
 
 const TRK = 46, HEAD = 46, GAP = 16, PADB = 24, BAND = 34, TW = 62, TH = 35;
 
-interface Props { model: MapModel; colors: Map<string, string>; selectedKey: string | null; hotKeys: Set<string>; zoom: "fit" | 1; onSelect: (key: string | null) => void }
+export interface NodeTargetView { disposition: "keep" | "automate" | "assist" | "remove"; before: number; after: number; ids: string[] }
+interface Props { model: MapModel; colors: Map<string, string>; selectedKey: string | null; hotKeys: Set<string>; zoom: "fit" | 1; onSelect: (key: string | null) => void; target?: Map<string, NodeTargetView> }
 
 interface Pos { x: number; y: number; w: number; h: number; cx: number; my: number }
 
-export default function ProcessMap({ model, colors, selectedKey, hotKeys, zoom, onSelect }: Props) {
+export default function ProcessMap({ model, colors, selectedKey, hotKeys, zoom, onSelect, target }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [avail, setAvail] = useState(1000);
   useEffect(() => {
@@ -81,6 +82,7 @@ export default function ProcessMap({ model, colors, selectedKey, hotKeys, zoom, 
       <svg viewBox={`${-extraL} 0 ${vbW} ${H}`} width={Math.round(vbW * scale)} height={Math.round(H * scale)} role="img" aria-label="Process map, one column per application">
         <defs>
           <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.5" height="6" fill="var(--text-3)" fillOpacity={0.22} /></pattern>
+          <pattern id="assist" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><rect width="5" height="10" fill="var(--brand)" fillOpacity={0.1} /></pattern>
           <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--text-3)" /></marker>
           <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--danger)" /></marker>
           <marker id="arh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--brand)" /></marker>
@@ -128,16 +130,18 @@ export default function ProcessMap({ model, colors, selectedKey, hotKeys, zoom, 
           </g>
         ))}
 
-        {nodes.map((n) => <NodeBox key={n.key} n={n} p={pos.get(n.key)!} model={model} selected={n.key === selectedKey} hot={hotKeys.has(n.key)} dim={hotKeys.size > 0 && !hotKeys.has(n.key)} onSelect={onSelect} />)}
+        {nodes.map((n) => <NodeBox key={n.key} n={n} p={pos.get(n.key)!} model={model} selected={n.key === selectedKey} hot={hotKeys.has(n.key)} dim={hotKeys.size > 0 && !hotKeys.has(n.key)} onSelect={onSelect} target={target?.get(n.key)} />)}
       </svg>
     </div>
   );
 }
 
-function NodeBox({ n, p, model, selected, hot, dim, onSelect }: { n: MapNode; p: Pos; model: MapModel; selected: boolean; hot: boolean; dim: boolean; onSelect: (key: string | null) => void }) {
+function NodeBox({ n, p, model, selected, hot, dim, onSelect, target }: { n: MapNode; p: Pos; model: MapModel; selected: boolean; hot: boolean; dim: boolean; onSelect: (key: string | null) => void; target?: NodeTargetView }) {
   const rec = model.recs[n.rec];
   const lines = wrapText(n.action, 17, 2);
-  const cls = ["node", selected ? "selected" : "", hot ? "hot" : "", dim ? "dim" : ""].join(" ");
+  const t = target && target.disposition !== "keep" ? target : undefined;
+  const cls = ["node", selected ? "selected" : "", hot ? "hot" : "", dim ? "dim" : "", t ? `t-${t.disposition}` : "", t && t.after > 0.05 && t.disposition !== "assist" ? "partial" : ""].join(" ");
+  const tagText = t ? (t.disposition === "remove" ? (t.after > 0.05 ? "Shorter" : "Removed") : t.disposition === "automate" ? "Automated" : "Assisted") : "";
   return (
     <g className={cls} tabIndex={0} role="button" aria-label={`${n.application}: ${n.action}, ${fmtSeconds(n.dur)}`}
       onClick={() => onSelect(selected ? null : n.key)} onKeyDown={(ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); onSelect(n.key); } }}>
@@ -146,7 +150,10 @@ function NodeBox({ n, p, model, selected, hot, dim, onSelect }: { n: MapNode; p:
       <image href={frameUrl(rec.run, rec.src, n.frame)} x={p.x + 7} y={p.y + 7} width={TW} height={TH} preserveAspectRatio="xMidYMid slice" clipPath={`url(#c-${n.key.replace(":", "-")})`} />
       <rect className="thumbframe" x={p.x + 7} y={p.y + 7} width={TW} height={TH} rx={2} />
       {lines.map((l, k) => <text key={k} className="action" x={p.x + 77} y={p.y + 20 + k * 15}>{l}</text>)}
-      <text className="dur" x={p.x + p.w - 8} y={p.y + p.h - 8} textAnchor="end">{fmtSeconds(n.dur)}{n.wait ? " wait" : ""} · {fmtPct(n.share)}</text>
+      {t && <rect className="tfill" x={p.x} y={p.y} width={p.w} height={p.h} rx={5} />}
+      {t ? <text className="dur" x={p.x + p.w - 8} y={p.y + p.h - 8} textAnchor="end">{fmtSeconds(t.before)} → {fmtSeconds(t.after)}</text>
+         : <text className="dur" x={p.x + p.w - 8} y={p.y + p.h - 8} textAnchor="end">{fmtSeconds(n.dur)}{n.wait ? " wait" : ""} · {fmtPct(n.share)}</text>}
+      {t && <g transform={`translate(${p.x + 7},${p.y + 7})`}><rect className="ttag" x={0} y={0} width={TW} height={14} rx={2} /><text className="ttagtext" x={TW / 2} y={10.5} textAnchor="middle">{tagText}</text></g>}
       <text className="stepno" x={p.x + 7} y={p.y + p.h - 8}>step {n.steps.length > 1 ? n.steps.join(", ") : n.steps[0]}</text>
       {n.visits > 1 && <g transform={`translate(${p.x + p.w - 12},${p.y + 12})`}><circle r={9} fill="var(--danger)" /><text className="badge" textAnchor="middle" y={3.5}>{n.visits}×</text></g>}
     </g>

@@ -10,5 +10,5 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const loaded = await getRun(id);
   if (!loaded) notFound();
   if (!loaded.run) return <RunProgress id={id} initial={loaded.pending!} />;
-  return <RunView run={loaded.run} frameBase={loaded.frameBase} frames={loaded.frames} sample={loaded.source === "sample"} processedAt={loaded.processedAt ?? null} process={loaded.process ?? null} />;
+  return <RunView run={loaded.run} frameBase={loaded.frameBase} frames={loaded.frames} sample={loaded.source === "sample"} processedAt={loaded.processedAt ?? null} process={loaded.process ?? null} recs={loaded.recs ?? null} />;
 }

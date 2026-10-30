@@ -11,19 +11,28 @@ import Timeline, { type Selection } from "./Timeline";
 import ProcessMap from "./ProcessMap";
 import StepsTable from "./StepsTable";
 import Inspector from "./Inspector";
+import { RecMain, RecSide, useRecommendations, type RecState } from "./RecTabs";
+import type { Recommendations } from "@/lib/types";
+import type { Filter } from "./Recommendations";
 
 export type { Selection };
 
 interface Props {
   run: Run; frameBase: string; frames: number[] | null; sample: boolean; processedAt?: string | null; costUsd?: number;
   process?: { id: string; name: string; role: string | null } | null;
+  recs?: Recommendations | null;
 }
 
-export default function RunView({ run, frameBase, frames, sample, processedAt, costUsd, process }: Props) {
+export default function RunView({ run, frameBase, frames, sample, processedAt, costUsd, process, recs: initialRecs }: Props) {
   const [sel, setSel] = useState<Selection>({ nodeKey: null, findingIndex: null });
-  const [tab, setTab] = useState<"map" | "steps">("map");
+  const [tab, setTab] = useState<"map" | "steps" | "recs" | "target">("map");
   const [itab, setItab] = useState<"findings" | "step">("findings");
   const [zoom, setZoom] = useState<"fit" | 1>(1);
+  const [rfilter, setRfilter] = useState<Filter>("all");
+  const [rsel, setRsel] = useState<string | null>(null);
+  const [applied, setApplied] = useState<"proposed" | "accepted">("proposed");
+  const decideUrl = sample ? null : `/api/runs/${run.id}/recommendations`;
+  const rec = useRecommendations(initialRecs ?? null, decideUrl);
   const src = useMemo<FrameSource>(() => ({ base: frameBase, available: frames }), [frameBase, frames]);
   const model = useMemo(() => buildModel([{ run, src }]), [run, src]);
   const colors = useMemo(() => laneColors(model), [model]);
@@ -46,6 +55,14 @@ export default function RunView({ run, frameBase, frames, sample, processedAt, c
     setItab("findings");
   };
 
+  const recState: RecState = {
+    recs: rec.recs, model, colors, findings, filter: rfilter, setFilter: setRfilter, selectedId: rsel,
+    setSelectedId: (id) => { setRsel(id); const it = rec.recs?.items.find((i) => i.id === id); if (it?.refs[0]) setSel({ nodeKey: it.refs[0].node_id ? `r${it.refs[0].rec}:${it.refs[0].node_id}` : null, findingIndex: null }); },
+    applied, setApplied, zoom, selectedKey: sel.nodeKey, onSelectNode: (k) => selectNode(k),
+    canDecide: decideUrl !== null, busy: rec.busy, error: rec.error, decide: rec.decide, regenerate: rec.regenerate,
+  };
+  const recCount = rec.recs?.items.length ?? 0;
+
   return (
     <main className="page">
       <nav className="crumbs" aria-label="Breadcrumb"><Link href="/">Runs</Link><span>›</span>{process && <><Link href={`/processes/${process.id}`}>{process.name}</Link><span>›</span></>}<span>{run.source}</span></nav>
@@ -63,6 +80,7 @@ export default function RunView({ run, frameBase, frames, sample, processedAt, c
         <div className="actions">
           <a className="btn" href={`/api/runs/${run.id}/export?format=json`}>Export JSON</a>
           <a className="btn" href={`/api/runs/${run.id}/export?format=bpmn`}>Export BPMN</a>
+          {rec.recs && !sample && <a className="btn" href={`/api/runs/${run.id}/recommendations?download=1`}>Export recommendations</a>}
         </div>
       </div>
 
@@ -85,19 +103,23 @@ export default function RunView({ run, frameBase, frames, sample, processedAt, c
             <div className="tabs" role="tablist">
               <button className="tab" role="tab" aria-selected={tab === "map"} onClick={() => setTab("map")}>Process map</button>
               <button className="tab" role="tab" aria-selected={tab === "steps"} onClick={() => setTab("steps")}>Steps <span className="n">{run.steps.length}</span></button>
+              <button className="tab" role="tab" aria-selected={tab === "recs"} onClick={() => setTab("recs")}>Recommendations {recCount > 0 && <span className="n">{recCount}</span>}</button>
+              <button className="tab" role="tab" aria-selected={tab === "target"} onClick={() => setTab("target")}>Target process</button>
               <span style={{ flex: 1 }} />
               {tab === "map" && <span className="hint" style={{ fontSize: ".82rem", color: "var(--text-3)", alignSelf: "center", paddingRight: 8 }}>columns are applications · read top to bottom · a jump between columns is an app switch</span>}
               {tab === "map" && <span className="zoom"><button className={`btn sm${zoom === "fit" ? " on" : ""}`} onClick={() => setZoom("fit")}>Fit</button><button className={`btn sm${zoom === 1 ? " on" : ""}`} onClick={() => setZoom(1)}>100%</button></span>}
             </div>
             {tab === "map" ? (
               <ProcessMap model={model} colors={colors} selectedKey={sel.nodeKey} hotKeys={hotKeys} zoom={zoom} onSelect={(key) => selectNode(key)} />
-            ) : (
+            ) : tab === "steps" ? (
               <div style={{ overflowX: "auto" }}><StepsTable run={run} rec={0} colors={colors} selectedKey={sel.nodeKey} onSelect={(key) => selectNode(key)} /></div>
+            ) : (
+              <RecMain tab={tab} st={recState} />
             )}
           </section>
         </div>
 
-        <Inspector model={model} findings={findings} colors={colors} tab={itab} onTab={setItab} selection={sel} onSelectNode={selectNode} onSelectFinding={selectFinding} labelModel={labelCalls[0]?.model} segModel={segCalls[0]?.model} />
+        {tab === "recs" || tab === "target" ? <RecSide tab={tab} st={recState} /> : <Inspector model={model} findings={findings} colors={colors} tab={itab} onTab={setItab} selection={sel} onSelectNode={selectNode} onSelectFinding={selectFinding} labelModel={labelCalls[0]?.model} segModel={segCalls[0]?.model} />}
       </div>
       <footer className="foot"><span>Boundaries by pixel-diff{segCalls.length ? `, what changed by ${segCalls[0].model}` : ""} · labels by {labelCalls[0]?.model ?? "Muse Spark"} · graph and findings deterministic</span></footer>
     </main>

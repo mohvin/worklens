@@ -88,6 +88,11 @@ def process_run(run_id: str) -> dict:
                     "frames_available": publish, "log": log,
                 },
             )
+            try:
+                recs = _recommend_run(run, row.get("role") or "")
+                sb.update_run(run_id, recommendations_json=recs.model_dump())
+            except Exception as e:  # noqa: BLE001 - recommendations are additive; the run is already built
+                log.append(f"recommendations failed: {e}")
             if row.get("process_id"):
                 build_process_job.spawn(row["process_id"])
             return {"ok": True, "steps": len(run.steps), "findings": len(run.findings)}
@@ -118,9 +123,92 @@ def build_process_job(process_id: str) -> dict:
         proc = build_process(process_id, row["name"], runs, roles)
         sb.upload("runs", f"processes/{process_id}/process.bpmn", to_process_bpmn(proc, runs).encode(), "application/xml")
         sb.update_process(process_id, status="built", process_json=proc.model_dump())
+        try:
+            from worklens_worker.models import Recommendations
+            from worklens_worker.recommend import build_recommendations, recommend_client
+
+            prev = Recommendations.model_validate(row["recommendations_json"]) if row.get("recommendations_json") else None
+            with tempfile.TemporaryDirectory() as tmp:
+                recs = build_recommendations(runs, roles, proc, client=recommend_client(Path(tmp) / "cache"), previous=prev)
+            sb.update_process(process_id, recommendations_json=recs.model_dump())
+        except Exception as e:  # noqa: BLE001
+            sb.update_process(process_id, error=f"recommendations: {e}"[:500])
         return {"ok": True, "recordings": len(runs), "findings": len(proc.findings)}
     except Exception as e:  # noqa: BLE001
         sb.update_process(process_id, status="failed", error=f"{type(e).__name__}: {e}"[:1000])
+        return {"error": str(e)}
+
+
+def _recommend_run(run, role: str):
+    from worklens_worker.recommend import build_recommendations, recommend_client
+
+    with tempfile.TemporaryDirectory() as tmp:
+        return build_recommendations([run], [role or "Recording 1"], None, client=recommend_client(Path(tmp) / "cache"))
+
+
+@app.function(image=image, secrets=secrets, timeout=300)
+def decide_job(kind: str, target_id: str, item_id: str, status: str, decided_by: str | None, note: str | None) -> dict:
+    """Record a decision on one recommendation and recompute the numbers; no model call."""
+    from worklens_worker.models import Process, Recommendations, Run
+    from worklens_worker.recommend import apply_decision
+    from worklens_worker.supabase import Supabase
+
+    sb = Supabase.from_env()
+    try:
+        if kind == "process":
+            row = sb.get_process(target_id)
+            if not row or not row.get("recommendations_json"):
+                return {"error": "no recommendations on this process"}
+            rows = [r for r in sb.list_runs(target_id) if r.get("status") == "built" and r.get("run_json")]
+            runs = [Run.model_validate(r["run_json"]) for r in rows]
+            roles = [r.get("role") or f"Recording {i + 1}" for i, r in enumerate(rows)]
+            proc = Process.model_validate(row["process_json"])
+            recs = apply_decision(Recommendations.model_validate(row["recommendations_json"]), runs, roles, proc, item_id, status, decided_by, note)
+            sb.update_process(target_id, recommendations_json=recs.model_dump())
+        else:
+            row = sb.get_run(target_id)
+            if not row or not row.get("recommendations_json"):
+                return {"error": "no recommendations on this run"}
+            run = Run.model_validate(row["run_json"])
+            recs = apply_decision(Recommendations.model_validate(row["recommendations_json"]), [run], [row.get("role") or "Recording 1"], None, item_id, status, decided_by, note)
+            sb.update_run(target_id, recommendations_json=recs.model_dump())
+        return {"ok": True}
+    except KeyError:
+        return {"error": "no such recommendation"}
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e)}
+
+
+@app.function(image=image, secrets=secrets, timeout=600)
+def recommend_job(kind: str, target_id: str) -> dict:
+    """(Re)generate recommendations for a run or a process, keeping earlier decisions."""
+    from worklens_worker.models import Process, Recommendations, Run
+    from worklens_worker.recommend import build_recommendations, recommend_client
+    from worklens_worker.supabase import Supabase
+
+    sb = Supabase.from_env()
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            client = recommend_client(Path(tmp) / "cache")
+            if kind == "process":
+                row = sb.get_process(target_id)
+                if not row or row.get("status") != "built":
+                    return {"error": "process not built"}
+                rows = [r for r in sb.list_runs(target_id) if r.get("status") == "built" and r.get("run_json")]
+                runs = [Run.model_validate(r["run_json"]) for r in rows]
+                roles = [r.get("role") or f"Recording {i + 1}" for i, r in enumerate(rows)]
+                prev = Recommendations.model_validate(row["recommendations_json"]) if row.get("recommendations_json") else None
+                recs = build_recommendations(runs, roles, Process.model_validate(row["process_json"]), client=client, previous=prev)
+                sb.update_process(target_id, recommendations_json=recs.model_dump())
+            else:
+                row = sb.get_run(target_id)
+                if not row or row.get("status") != "built":
+                    return {"error": "run not built"}
+                prev = Recommendations.model_validate(row["recommendations_json"]) if row.get("recommendations_json") else None
+                recs = build_recommendations([Run.model_validate(row["run_json"])], [row.get("role") or "Recording 1"], None, client=client, previous=prev)
+                sb.update_run(target_id, recommendations_json=recs.model_dump())
+        return {"ok": True, "items": len(recs.items), "ai_unavailable": recs.summary.ai_unavailable}
+    except Exception as e:  # noqa: BLE001
         return {"error": str(e)}
 
 
@@ -130,6 +218,13 @@ def enqueue(body: dict) -> dict:
     """POST {"run_id": "...", "secret": "..."} to process a recording, or {"process_id": "...", "secret": "..."} to merge a process."""
     if not body.get("secret") or body["secret"] != os.environ.get("WORKLENS_WORKER_SECRET"):
         return {"error": "unauthorised"}
+    decide = body.get("decide")
+    if isinstance(decide, dict):  # {"kind": "run"|"process", "id", "item_id", "status", "decided_by", "note"}: synchronous, small
+        return decide_job.remote(str(decide.get("kind", "process")), str(decide.get("id", "")), str(decide.get("item_id", "")), str(decide.get("status", "proposed")), decide.get("decided_by"), decide.get("note"))
+    recommend = body.get("recommend")
+    if isinstance(recommend, dict):  # {"kind": "run"|"process", "id"}: regenerate in the background
+        call = recommend_job.spawn(str(recommend.get("kind", "process")), str(recommend.get("id", "")))
+        return {"ok": True, "call_id": call.object_id}
     process_id = str(body.get("process_id", ""))
     if process_id:
         call = build_process_job.spawn(process_id)

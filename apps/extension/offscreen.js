@@ -11,10 +11,15 @@ const send = (msg) => chrome.runtime.sendMessage(msg).catch(() => {});
 const elapsed = () => (recStart ? (pausedAt ? pausedAt : Date.now()) - recStart - pausedTotal : 0);
 
 async function start(streamId) {
-  stream = await navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: { mandatory: { chromeMediaSource: "desktop", chromeMediaSourceId: streamId, maxWidth: 1920, maxHeight: 1200, maxFrameRate: 10 } },
-  });
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { mandatory: { chromeMediaSource: "desktop", chromeMediaSourceId: streamId, maxWidth: 1920, maxHeight: 1200, maxFrameRate: 10 } },
+    });
+  } catch (e) {
+    const why = `${e?.name || "Error"}: ${e?.message || e}`;
+    throw new Error(`Could not start the capture (${why}). Pick "Entire Screen" in Chrome's picker, and check System Settings → Privacy & Security → Screen Recording allows Google Chrome.`);
+  }
   const mime = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find((m) => MediaRecorder.isTypeSupported(m)) || "";
   recorder = new MediaRecorder(stream, { mimeType: mime || undefined, videoBitsPerSecond: 2_500_000 });
   chunks = []; bytes = 0; blob = null; pausedAt = 0; pausedTotal = 0;

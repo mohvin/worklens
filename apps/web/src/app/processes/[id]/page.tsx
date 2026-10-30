@@ -13,5 +13,5 @@ export default async function ProcessPage({ params }: { params: Promise<{ id: st
   if (!ready || !loaded.proc) {
     return <ProcessProgress id={id} name={loaded.row.name} initial={{ status: loaded.row.status, error: loaded.row.error, recordings: loaded.recs.map((r) => ({ id: r.id, role: r.role, source: r.source, status: r.status, error: r.error })) }} />;
   }
-  return <ProcessView proc={loaded.proc} recs={loaded.recs} processedAt={new Date(loaded.row.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} />;
+  return <ProcessView proc={loaded.proc} recs={loaded.recs} recommendations={loaded.recommendations} processedAt={new Date(loaded.row.updated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} />;
 }
