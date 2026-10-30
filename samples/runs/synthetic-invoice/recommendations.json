@@ -1,9 +1,9 @@
 {
   "version": "rec-v1",
-  "generated_at": "2026-10-30T17:50:36+00:00",
+  "generated_at": "2026-10-30T19:39:02+00:00",
   "rules_version": "v3",
-  "model": null,
-  "prompt_version": null,
+  "model": "muse-spark-1.3",
+  "prompt_version": "rec-v1",
   "factors": {
     "document_extraction": 0.8,
     "lookup_validation": 0.9,
@@ -263,9 +263,730 @@
       "source": "rule",
       "model": null,
       "prompt_version": null
+    },
+    {
+      "id": "ai-r0:n5",
+      "path": "ai",
+      "kind": "assist",
+      "mechanism": "prefill",
+      "title": "Assist: fill invoice form (ERP - Accounts Payable)",
+      "detail": "prefill for 'fill invoice form' in ERP - Accounts Payable.",
+      "rationale": "Re-keyed Supplier, Invoice no. INV-20481, date 20/10/2026, PO PO-7731 from PDF Viewer into ERP Accounts Payable form",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 5,
+          "node_id": "n5"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 41
+        }
+      ],
+      "seconds_saved": 10.2,
+      "seconds_raw": 10.2,
+      "potential_seconds": 0.0,
+      "method": "(step 5 17 s) x 0.6",
+      "share_saved": 0.1074,
+      "confidence": "high",
+      "factor": 0.6,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 5,
+            "node_id": "n5"
+          },
+          "seconds_before": 17.0,
+          "seconds_raw": 10.2,
+          "seconds_counted": 10.2
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "Clerk reviews and confirms prefilled header fields",
+      "guardrail": "Clerk must verify prefilled supplier, invoice no., date and PO before continuing",
+      "data_needed": [
+        "Extracted Supplier Acme Supplies Ltd",
+        "Extracted Invoice no. INV-20481",
+        "Extracted Invoice date 20/10/2026",
+        "Extracted PO number PO-7731"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n7",
+      "path": "ai",
+      "kind": "assist",
+      "mechanism": "prefill",
+      "title": "Assist: fill invoice form and submit (ERP - Accounts Payable)",
+      "detail": "prefill for 'fill invoice form and submit' in ERP - Accounts Payable.",
+      "rationale": "Fill Net 3541.67, VAT 708.33, Total 4250.00 into ERP form for INV-20481 to create AP-000912",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 7,
+          "node_id": "n7"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 67
+        }
+      ],
+      "seconds_saved": 7.8,
+      "seconds_raw": 7.8,
+      "potential_seconds": 0.0,
+      "method": "(step 7 13 s) x 0.6",
+      "share_saved": 0.0821,
+      "confidence": "medium",
+      "factor": 0.6,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 7,
+            "node_id": "n7"
+          },
+          "seconds_before": 13.0,
+          "seconds_raw": 7.8,
+          "seconds_counted": 7.8
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "Clerk verifies amounts and performs final submit to create AP-000912",
+      "guardrail": "Require clerk confirm of amounts and explicit submit; block if Net+VAT != Total",
+      "data_needed": [
+        "Extracted Net 3541.67",
+        "Extracted VAT 708.33",
+        "Extracted Total 4250.00",
+        "Validated PO-7731 match result"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n3",
+      "path": "ai",
+      "kind": "automate",
+      "mechanism": "document_extraction",
+      "title": "Automate: read invoice PDF (PDF Viewer)",
+      "detail": "document extraction for 'read invoice PDF' in PDF Viewer.",
+      "rationale": "Read Invoice number INV-20481, date 20 Oct 2026, PO PO-7731, Net 3,541.67, VAT 708.33, Total 4,250.00 from PDF",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 3,
+          "node_id": "n3"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 12
+        }
+      ],
+      "seconds_saved": 6.4,
+      "seconds_raw": 6.4,
+      "potential_seconds": 0.0,
+      "method": "(step 3 8 s) x 0.8",
+      "share_saved": 0.0674,
+      "confidence": "high",
+      "factor": 0.8,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 3,
+            "node_id": "n3"
+          },
+          "seconds_before": 8.0,
+          "seconds_raw": 6.4,
+          "seconds_counted": 6.4
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "None - clerk handles low-confidence extractions",
+      "guardrail": "Human review if extraction confidence low or totals do not balance",
+      "data_needed": [
+        "invoice-20481.pdf image"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n6",
+      "path": "ai",
+      "kind": "automate",
+      "mechanism": "lookup_validation",
+      "title": "Automate: check PO in register (Sheets)",
+      "detail": "lookup validation for 'check PO in register' in Sheets.",
+      "rationale": "Cross-check PO-7731, Acme Supplies Ltd, 4,250.00 and Received status between ERP and Sheets register by hand",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 6,
+          "node_id": "n6"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 58
+        }
+      ],
+      "seconds_saved": 5.885,
+      "seconds_raw": 8.1,
+      "potential_seconds": 0.0,
+      "method": "(step 6 9 s) x 0.9 -> 6 s counted after overlaps",
+      "share_saved": 0.0619,
+      "confidence": "high",
+      "factor": 0.9,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 6,
+            "node_id": "n6"
+          },
+          "seconds_before": 9.0,
+          "seconds_raw": 8.1,
+          "seconds_counted": 5.885
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "None - clerk handles mismatches only",
+      "guardrail": "Block submit and route to clerk if PO, supplier, amount 4250.00 or Received status mismatch",
+      "data_needed": [
+        "ERP PO number PO-7731",
+        "Sheets PO register row PO-7731 with supplier, amount, Received status"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n1",
+      "path": "ai",
+      "kind": "automate",
+      "mechanism": "straight_through",
+      "title": "Automate: select invoice email (Mail)",
+      "detail": "straight through for 'select invoice email' in Mail.",
+      "rationale": "Mechanical selection of Invoice INV-20481 email showing Acme Supplies and 4,250.00 GBP in Mail",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 0,
+          "node_id": "n1"
+        },
+        {
+          "rec": 0,
+          "step": 1,
+          "node_id": "n1"
+        },
+        {
+          "rec": 0,
+          "step": 8,
+          "node_id": "n1"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 0
+        },
+        {
+          "rec": 0,
+          "frame": 4
+        },
+        {
+          "rec": 0,
+          "frame": 80
+        }
+      ],
+      "seconds_saved": 5.7,
+      "seconds_raw": 8.55,
+      "potential_seconds": 0.0,
+      "method": "(step 0 4 s + step 1 2 s + step 8 3 s) x 0.95 -> 6 s counted after overlaps",
+      "share_saved": 0.06,
+      "confidence": "high",
+      "factor": 0.95,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 0,
+            "node_id": "n1"
+          },
+          "seconds_before": 4.0,
+          "seconds_raw": 3.8,
+          "seconds_counted": 3.8
+        },
+        {
+          "ref": {
+            "rec": 0,
+            "step": 1,
+            "node_id": "n1"
+          },
+          "seconds_before": 2.0,
+          "seconds_raw": 1.9,
+          "seconds_counted": 1.9
+        },
+        {
+          "ref": {
+            "rec": 0,
+            "step": 8,
+            "node_id": "n1"
+          },
+          "seconds_before": 3.0,
+          "seconds_raw": 2.85,
+          "seconds_counted": 0.0
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "None - exception handling only",
+      "guardrail": "Exception to clerk if email not found or multiple matches",
+      "data_needed": [
+        "Mail inbox message ID for INV-20481"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n2",
+      "path": "ai",
+      "kind": "automate",
+      "mechanism": "straight_through",
+      "title": "Automate: open attachment (Mail)",
+      "detail": "straight through for 'open attachment' in Mail.",
+      "rationale": "Mechanical open of invoice-20481.pdf from accounts@acme-supplies.example email",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 2,
+          "node_id": "n2"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 6
+        }
+      ],
+      "seconds_saved": 5.7,
+      "seconds_raw": 5.7,
+      "potential_seconds": 0.0,
+      "method": "(step 2 6 s) x 0.95",
+      "share_saved": 0.06,
+      "confidence": "high",
+      "factor": 0.95,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 2,
+            "node_id": "n2"
+          },
+          "seconds_before": 6.0,
+          "seconds_raw": 5.7,
+          "seconds_counted": 5.7
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "None - exception handling only",
+      "guardrail": "Exception if attachment missing or unreadable",
+      "data_needed": [
+        "Attachment ID invoice-20481.pdf (84 KB)"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n4",
+      "path": "ai",
+      "kind": "keep_human",
+      "mechanism": null,
+      "title": "Keep human: wait for invoice form to load",
+      "detail": "ERP - Accounts Payable \u00b7 wait for invoice form to load stays with the person.",
+      "rationale": "Waiting screen for ERP invoice form to load - 21s latency with no user action",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 4,
+          "node_id": "n4"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 20
+        }
+      ],
+      "seconds_saved": 0.0,
+      "seconds_raw": 0.0,
+      "potential_seconds": 0.0,
+      "method": "kept on purpose: 0 s",
+      "share_saved": 0.0,
+      "confidence": "high",
+      "factor": null,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 4,
+            "node_id": "n4"
+          },
+          "seconds_before": 21.0,
+          "seconds_raw": 0.0,
+          "seconds_counted": 0.0
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "Full wait remains - no human action to automate",
+      "guardrail": "No automation applied to system wait time",
+      "data_needed": [],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n8",
+      "path": "ai",
+      "kind": "automate",
+      "mechanism": "straight_through",
+      "title": "Automate: click Reply (Mail)",
+      "detail": "straight through for 'click Reply' in Mail.",
+      "rationale": "Mechanical click Reply on Invoice INV-20481 email from accounts@acme-supplies.example",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 9,
+          "node_id": "n8"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 83
+        }
+      ],
+      "seconds_saved": 0.0,
+      "seconds_raw": 1.9,
+      "potential_seconds": 0.0,
+      "method": "(step 9 2 s) x 0.95 -> 0 s counted after overlaps",
+      "share_saved": 0.0,
+      "confidence": "high",
+      "factor": 0.95,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 9,
+            "node_id": "n8"
+          },
+          "seconds_before": 2.0,
+          "seconds_raw": 1.9,
+          "seconds_counted": 0.0
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "None - exception handling only",
+      "guardrail": "Exception if reply context cannot be opened",
+      "data_needed": [
+        "Message ID for Invoice INV-20481 thread"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n9",
+      "path": "ai",
+      "kind": "keep_human",
+      "mechanism": null,
+      "title": "Keep human: send approval reply",
+      "detail": "Mail \u00b7 send approval reply stays with the person.",
+      "rationale": "Financial approval decision sending 'Invoice INV-20481 approved for payment' with Ref AP-00",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 10,
+          "node_id": "n9"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 85
+        }
+      ],
+      "seconds_saved": 0.0,
+      "seconds_raw": 0.0,
+      "potential_seconds": 0.0,
+      "method": "kept on purpose: 0 s",
+      "share_saved": 0.0,
+      "confidence": "high",
+      "factor": null,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 10,
+            "node_id": "n9"
+          },
+          "seconds_before": 6.0,
+          "seconds_raw": 0.0,
+          "seconds_counted": 0.0
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "Full approval judgment and sending of payment approval remains with clerk",
+      "guardrail": "Financial approval authority cannot be delegated; retain audit trail",
+      "data_needed": [
+        "AP reference AP-000912",
+        "Invoice INV-20481 approval status"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
+    },
+    {
+      "id": "ai-r0:n10",
+      "path": "ai",
+      "kind": "assist",
+      "mechanism": "straight_through",
+      "title": "Assist: view approval reply (Mail)",
+      "detail": "straight through for 'view approval reply' in Mail.",
+      "rationale": "Mechanical confirmation view that 'Invoice INV-20481 approved for payment' reply was sent",
+      "refs": [
+        {
+          "rec": 0,
+          "step": 11,
+          "node_id": "n10"
+        }
+      ],
+      "finding_keys": [],
+      "evidence": [
+        {
+          "rec": 0,
+          "frame": 91
+        }
+      ],
+      "seconds_saved": 0.0,
+      "seconds_raw": 3.8,
+      "potential_seconds": 0.0,
+      "method": "(step 11 4 s) x 0.95 -> 0 s counted after overlaps",
+      "share_saved": 0.0,
+      "confidence": "medium",
+      "factor": 0.95,
+      "savings": [
+        {
+          "ref": {
+            "rec": 0,
+            "step": 11,
+            "node_id": "n10"
+          },
+          "seconds_before": 4.0,
+          "seconds_raw": 3.8,
+          "seconds_counted": 0.0
+        }
+      ],
+      "depends_on": [],
+      "stays_human": "None - clerk handles send failures only",
+      "guardrail": "Surface send failure to clerk",
+      "data_needed": [
+        "Sent approval message ID for INV-20481"
+      ],
+      "status": "proposed",
+      "decided_by": null,
+      "decided_at": null,
+      "note": null,
+      "source": "model",
+      "model": "muse-spark-1.3",
+      "prompt_version": "rec-v1"
     }
   ],
-  "classification": [],
+  "classification": [
+    {
+      "key": "r0:n1",
+      "disposition": "automate",
+      "mechanism": "straight_through",
+      "rationale": "Mechanical selection of Invoice INV-20481 email showing Acme Supplies and 4,250.00 GBP in Mail",
+      "stays_human": "None - exception handling only",
+      "guardrail": "Exception to clerk if email not found or multiple matches",
+      "data_needed": [
+        "Mail inbox message ID for INV-20481"
+      ],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n2",
+      "disposition": "automate",
+      "mechanism": "straight_through",
+      "rationale": "Mechanical open of invoice-20481.pdf from accounts@acme-supplies.example email",
+      "stays_human": "None - exception handling only",
+      "guardrail": "Exception if attachment missing or unreadable",
+      "data_needed": [
+        "Attachment ID invoice-20481.pdf (84 KB)"
+      ],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n3",
+      "disposition": "automate",
+      "mechanism": "document_extraction",
+      "rationale": "Read Invoice number INV-20481, date 20 Oct 2026, PO PO-7731, Net 3,541.67, VAT 708.33, Total 4,250.00 from PDF",
+      "stays_human": "None - clerk handles low-confidence extractions",
+      "guardrail": "Human review if extraction confidence low or totals do not balance",
+      "data_needed": [
+        "invoice-20481.pdf image"
+      ],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n4",
+      "disposition": "keep_human",
+      "mechanism": null,
+      "rationale": "Waiting screen for ERP invoice form to load - 21s latency with no user action",
+      "stays_human": "Full wait remains - no human action to automate",
+      "guardrail": "No automation applied to system wait time",
+      "data_needed": [],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n5",
+      "disposition": "assist",
+      "mechanism": "prefill",
+      "rationale": "Re-keyed Supplier, Invoice no. INV-20481, date 20/10/2026, PO PO-7731 from PDF Viewer into ERP Accounts Payable form",
+      "stays_human": "Clerk reviews and confirms prefilled header fields",
+      "guardrail": "Clerk must verify prefilled supplier, invoice no., date and PO before continuing",
+      "data_needed": [
+        "Extracted Supplier Acme Supplies Ltd",
+        "Extracted Invoice no. INV-20481",
+        "Extracted Invoice date 20/10/2026",
+        "Extracted PO number PO-7731"
+      ],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n6",
+      "disposition": "automate",
+      "mechanism": "lookup_validation",
+      "rationale": "Cross-check PO-7731, Acme Supplies Ltd, 4,250.00 and Received status between ERP and Sheets register by hand",
+      "stays_human": "None - clerk handles mismatches only",
+      "guardrail": "Block submit and route to clerk if PO, supplier, amount 4250.00 or Received status mismatch",
+      "data_needed": [
+        "ERP PO number PO-7731",
+        "Sheets PO register row PO-7731 with supplier, amount, Received status"
+      ],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n7",
+      "disposition": "assist",
+      "mechanism": "prefill",
+      "rationale": "Fill Net 3541.67, VAT 708.33, Total 4250.00 into ERP form for INV-20481 to create AP-000912",
+      "stays_human": "Clerk verifies amounts and performs final submit to create AP-000912",
+      "guardrail": "Require clerk confirm of amounts and explicit submit; block if Net+VAT != Total",
+      "data_needed": [
+        "Extracted Net 3541.67",
+        "Extracted VAT 708.33",
+        "Extracted Total 4250.00",
+        "Validated PO-7731 match result"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "key": "r0:n8",
+      "disposition": "automate",
+      "mechanism": "straight_through",
+      "rationale": "Mechanical click Reply on Invoice INV-20481 email from accounts@acme-supplies.example",
+      "stays_human": "None - exception handling only",
+      "guardrail": "Exception if reply context cannot be opened",
+      "data_needed": [
+        "Message ID for Invoice INV-20481 thread"
+      ],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n9",
+      "disposition": "keep_human",
+      "mechanism": null,
+      "rationale": "Financial approval decision sending 'Invoice INV-20481 approved for payment' with Ref AP-00",
+      "stays_human": "Full approval judgment and sending of payment approval remains with clerk",
+      "guardrail": "Financial approval authority cannot be delegated; retain audit trail",
+      "data_needed": [
+        "AP reference AP-000912",
+        "Invoice INV-20481 approval status"
+      ],
+      "confidence": "high"
+    },
+    {
+      "key": "r0:n10",
+      "disposition": "assist",
+      "mechanism": "straight_through",
+      "rationale": "Mechanical confirmation view that 'Invoice INV-20481 approved for payment' reply was sent",
+      "stays_human": "None - clerk handles send failures only",
+      "guardrail": "Surface send failure to clerk",
+      "data_needed": [
+        "Sent approval message ID for INV-20481"
+      ],
+      "confidence": "medium"
+    }
+  ],
   "target": {
     "applied": "proposed",
     "steps": [
@@ -277,10 +998,12 @@
         },
         "application": "Mail",
         "action": "select invoice email",
-        "disposition": "keep",
-        "recommendation_ids": [],
+        "disposition": "automate",
+        "recommendation_ids": [
+          "ai-r0:n1"
+        ],
         "seconds_before": 4.0,
-        "seconds_after": 4.0
+        "seconds_after": 0.2
       },
       {
         "ref": {
@@ -290,10 +1013,12 @@
         },
         "application": "Mail",
         "action": "select invoice email",
-        "disposition": "keep",
-        "recommendation_ids": [],
+        "disposition": "automate",
+        "recommendation_ids": [
+          "ai-r0:n1"
+        ],
         "seconds_before": 2.0,
-        "seconds_after": 2.0
+        "seconds_after": 0.1
       },
       {
         "ref": {
@@ -303,10 +1028,12 @@
         },
         "application": "Mail",
         "action": "open attachment",
-        "disposition": "keep",
-        "recommendation_ids": [],
+        "disposition": "automate",
+        "recommendation_ids": [
+          "ai-r0:n2"
+        ],
         "seconds_before": 6.0,
-        "seconds_after": 6.0
+        "seconds_after": 0.3
       },
       {
         "ref": {
@@ -316,10 +1043,12 @@
         },
         "application": "PDF Viewer",
         "action": "read invoice PDF",
-        "disposition": "keep",
-        "recommendation_ids": [],
+        "disposition": "automate",
+        "recommendation_ids": [
+          "ai-r0:n3"
+        ],
         "seconds_before": 8.0,
-        "seconds_after": 8.0
+        "seconds_after": 1.6
       },
       {
         "ref": {
@@ -344,10 +1073,11 @@
         "action": "fill invoice form",
         "disposition": "remove",
         "recommendation_ids": [
-          "fix-r0:f3"
+          "fix-r0:f3",
+          "ai-r0:n5"
         ],
         "seconds_before": 17.0,
-        "seconds_after": 11.115
+        "seconds_after": 0.915
       },
       {
         "ref": {
@@ -359,10 +1089,11 @@
         "action": "check PO in register",
         "disposition": "remove",
         "recommendation_ids": [
-          "fix-r0:f3"
+          "fix-r0:f3",
+          "ai-r0:n6"
         ],
         "seconds_before": 9.0,
-        "seconds_after": 5.885
+        "seconds_after": 0.0
       },
       {
         "ref": {
@@ -372,10 +1103,12 @@
         },
         "application": "ERP - Accounts Payable",
         "action": "fill invoice form and submit",
-        "disposition": "keep",
-        "recommendation_ids": [],
+        "disposition": "assist",
+        "recommendation_ids": [
+          "ai-r0:n7"
+        ],
         "seconds_before": 13.0,
-        "seconds_after": 13.0
+        "seconds_after": 5.2
       },
       {
         "ref": {
@@ -439,11 +1172,11 @@
       }
     ],
     "seconds_before": 95.0,
-    "seconds_after": 71.0,
+    "seconds_after": 29.315,
     "steps_before": 12,
-    "steps_after": 8,
+    "steps_after": 7,
     "app_switches_before": 5,
-    "app_switches_after": 4,
+    "app_switches_after": 2,
     "handoffs_before": 0,
     "handoffs_after": 0,
     "handoff_in_app": false,
@@ -623,13 +1356,13 @@
   "summary": {
     "total_seconds": 95.0,
     "fix_seconds": 24.0,
-    "ai_seconds": 0.0,
-    "counted_seconds": 24.0,
-    "share": 0.2526,
-    "proposed": 3,
+    "ai_seconds": 41.685,
+    "counted_seconds": 65.685,
+    "share": 0.6914,
+    "proposed": 13,
     "accepted": 0,
     "rejected": 0,
     "done": 0,
-    "ai_unavailable": "no model configured for the AI path"
+    "ai_unavailable": null
   }
 }
