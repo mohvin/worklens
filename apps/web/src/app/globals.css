@@ -31,16 +31,24 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .sr { position: absolute; left: -9999px; }
 
 /* app shell */
-.topbar { height: 48px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; padding-left: 16px; padding-right: 16px; position: sticky; top: 0; z-index: 20; }
-.mark { display: flex; align-items: center; gap: 8px; font-weight: 600; letter-spacing: -0.01em; }
-.mark i { width: 18px; height: 18px; border-radius: 4px; background: var(--brand); display: inline-block; position: relative; }
-.mark i::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--surface); }
-.ws { color: var(--text-2); font-size: 0.93rem; padding-left: 20px; border-left: 1px solid var(--border); }
-.topnav { display: flex; gap: 4px; margin-left: 8px; }
-.topnav a { text-decoration: none; color: var(--text-2); padding: 6px 10px; border-radius: var(--r); font-size: 0.93rem; }
-.topnav a[aria-current] { color: var(--text); background: var(--surface-2); font-weight: 500; }
+.topbar { height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; box-shadow: var(--shadow); }
+.topbar-in { height: 100%; max-width: 1480px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; gap: 16px; }
+.mark { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 1.02rem; letter-spacing: -0.01em; color: var(--text); text-decoration: none; }
+.mark:hover { color: var(--text); }
+.mark i { width: 20px; height: 20px; border-radius: 5px; background: var(--brand); display: inline-block; position: relative; }
+.mark i::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--surface); }
+.ws { color: var(--text-3); font-size: 0.9rem; padding-left: 16px; border-left: 1px solid var(--border); display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.ws b { color: var(--text-2); font-weight: 500; }
+.ws .sep { color: var(--border); font-weight: 300; }
+.topnav { display: flex; gap: 2px; margin-left: 12px; height: 100%; }
+.topnav a { text-decoration: none; color: var(--text-2); padding: 0 10px; font-size: 0.93rem; font-weight: 500; display: inline-flex; align-items: center; position: relative; }
+.topnav a:hover { color: var(--text); }
+.topnav a[aria-current] { color: var(--text); }
+.topnav a[aria-current]::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; background: var(--brand); border-radius: 2px 2px 0 0; }
 .topbar .right { margin-left: auto; display: flex; gap: 10px; align-items: center; color: var(--text-2); font-size: 0.93rem; }
-.avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); font-weight: 600; font-size: 0.8rem; display: grid; place-items: center; }
+.topbar .right .btn { text-decoration: none; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); font-weight: 600; font-size: 0.78rem; letter-spacing: .02em; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent); }
+@media (max-width: 720px) { .ws { display: none; } }
 
 .page { padding-left: 16px; padding-right: 16px; padding-block: 14px 40px; max-width: 1480px; margin: 0 auto; }
 .crumbs { font-size: 0.86rem; color: var(--text-3); display: flex; gap: 6px; }
