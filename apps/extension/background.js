@@ -1,7 +1,7 @@
 // WorkLens Recorder — background service worker.
 //
 // Owns the recording state, the tab log and the toolbar badge. The screen
-// capture itself lives in the offscreen page (offscreen.js), because a service
+// capture itself lives in the recorder window (picker.html + offscreen.js), because a service
 // worker cannot hold a media stream. The popup only reads state and sends
 // commands. Nothing here talks to the recording; the offscreen page reports
 // elapsed time, size and upload progress back through messages.
@@ -42,17 +42,13 @@ async function badge(s) {
   return set("", null);
 }
 
-// ---------- offscreen page ----------
-async function ensureOffscreen() {
-  const has = await chrome.offscreen.hasDocument?.();
-  if (has) return;
-  await chrome.offscreen.createDocument({
-    url: "offscreen.html",
-    reasons: ["USER_MEDIA", "DISPLAY_MEDIA"],
-    justification: "Hold the screen capture and upload the recording while the popup is closed.",
-  });
+// ---------- recorder window ----------
+// picker.html owns both Chrome's picker and the MediaRecorder (see picker.js). The
+// messages keep their "offscreen" target name; the page that answers is the window.
+async function closeOffscreen() {
+  const s = await getState();
+  if (s.recorderWindowId) { try { await chrome.windows.remove(s.recorderWindowId); } catch {} await setState({ recorderWindowId: null }); }
 }
-async function closeOffscreen() { try { if (await chrome.offscreen.hasDocument?.()) await chrome.offscreen.closeDocument(); } catch {} }
 const toOffscreen = (msg) => chrome.runtime.sendMessage({ target: "offscreen", ...msg }).catch(() => {});
 
 // ---------- tab log: which site is on screen, and when ----------
@@ -61,7 +57,7 @@ async function logActiveTab(reason) {
   const s = await getState();
   if (s.phase !== "recording") return;
   const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-  if (!tab) return;
+  if (!tab || (tab.url || "").startsWith("chrome-extension://")) return;   // never log the recorder window itself
   const entry = { t: Math.round(s.elapsed / 1000), host: host(tab.url || ""), title: (tab.title || "").slice(0, 120), reason };
   const last = s.tabLog[s.tabLog.length - 1];
   if (last && last.host === entry.host && last.title === entry.title) return;
@@ -70,9 +66,13 @@ async function logActiveTab(reason) {
 }
 chrome.tabs.onActivated.addListener(() => logActiveTab("switch"));
 // picker window closed without a choice -> back to idle, keeping what was typed
+// recorder window closed by the person
 chrome.windows.onRemoved.addListener(async (id) => {
   const s = await getState();
-  if (s.phase === "picking" && s.pickerWindowId === id) await setState({ ...INITIAL, base: s.base, role: s.role, processId: s.processId, newProcessName: s.newProcessName });
+  if (s.recorderWindowId !== id) return;
+  if (s.phase === "picking") await setState({ ...INITIAL, base: s.base, role: s.role, processId: s.processId, newProcessName: s.newProcessName });
+  else if (s.phase === "recording" || s.phase === "paused" || s.phase === "stopping" || s.phase === "uploading") await setState({ phase: "error", error: "The recorder window was closed, so the recording was lost. Start again and leave that window minimised.", recorderWindowId: null });
+  else await setState({ recorderWindowId: null });
 });
 chrome.tabs.onUpdated.addListener((_id, info, tab) => { if (tab.active && (info.title || info.url)) logActiveTab("navigate"); });
 chrome.windows.onFocusChanged.addListener((id) => { if (id !== chrome.windows.WINDOW_ID_NONE) logActiveTab("window"); });
@@ -89,32 +89,27 @@ async function api(base, path, body) {
 async function start({ role, processId, newProcessName }) {
   const s = await getState();
   if (s.phase !== "idle" && s.phase !== "done" && s.phase !== "error") return s;
-  // Remember what was asked, then open a small extension window that owns Chrome's picker
-  // (chooseDesktopMedia needs a visible extension page; from the worker it returns nothing).
+  await closeOffscreen();
   await setState({ ...INITIAL, base: s.base, phase: "picking", role, processId, newProcessName });
   try {
-    const win = await chrome.windows.create({ url: chrome.runtime.getURL("picker.html"), type: "popup", width: 420, height: 150, focused: true });
-    await setState({ pickerWindowId: win.id });
+    // a popup window large enough for Chrome's picker sheet; it records and is minimised once the capture runs
+    const win = await chrome.windows.create({ url: chrome.runtime.getURL("picker.html"), type: "popup", width: 980, height: 720, focused: true });
+    await setState({ recorderWindowId: win.id });
   } catch (e) {
-    return setState({ ...INITIAL, base: s.base, role, processId, newProcessName, phase: "error", error: `Could not open the picker: ${e.message}` });
+    return setState({ ...INITIAL, base: s.base, role, processId, newProcessName, phase: "error", error: `Could not open the recorder window: ${e.message}` });
   }
   return getState();
 }
 
-// The picker page reports the chosen stream (or "" when the person cancelled).
+// The recorder window reports the chosen stream (or "" when the person cancelled).
 async function picked(streamId) {
   const s = await getState();
   if (s.phase !== "picking") return s;
-  if (!streamId) return setState({ ...INITIAL, base: s.base, role: s.role, processId: s.processId, newProcessName: s.newProcessName });
-  try {
-    await ensureOffscreen();
-    await setState({ phase: "recording", startedAt: Date.now(), tabLog: [], current: null, pickerWindowId: null });
-    await toOffscreen({ type: "os-start", streamId });
-    setTimeout(() => logActiveTab("start"), 400);   // after the picker window has closed
-  } catch (e) {
-    await closeOffscreen();
-    return setState({ phase: "error", error: `Could not start the capture: ${e.message}` });
-  }
+  if (!streamId) { await closeOffscreen(); return setState({ ...INITIAL, base: s.base, role: s.role, processId: s.processId, newProcessName: s.newProcessName }); }
+  await setState({ phase: "recording", startedAt: Date.now(), tabLog: [], current: null });
+  await toOffscreen({ type: "os-start", streamId });
+  try { if (s.recorderWindowId) await chrome.windows.update(s.recorderWindowId, { state: "minimized" }); } catch {}
+  setTimeout(() => logActiveTab("start"), 600);   // once focus is back on the working window
   return getState();
 }
 
@@ -136,7 +131,8 @@ async function discard() {
 const slug = (t) => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
 
 // The offscreen page has the file: create the run, hand it the signed URL.
-async function onStopped({ size, type }) {
+async function onStopped({ size, contentType }) {
+  const type = contentType || "video/webm";
   const s = await getState();
   try {
     let processId = s.processId, processName = s.processName;

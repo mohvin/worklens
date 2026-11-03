@@ -69,7 +69,7 @@ def process_run(run_id: str) -> dict:
             video.write_bytes(sb.download("uploads", f"{run_id}/{row['source']}"))
             store = RunStore(Path(tmp) / "runs")
             run, run_dir = store.new_run(video, run_id=run_id)
-            run = run_pipeline(run, run_dir, video, store, progress=progress)
+            run = run_pipeline(run, run_dir, video, store, progress=progress, tab_log=row.get("tab_log") or None)
 
             publish = frames_to_publish(run)
             for i in publish:

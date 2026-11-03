@@ -28,7 +28,7 @@ async function start(streamId) {
     blob = new Blob(chunks, { type: "video/webm" });
     clearInterval(ticker); ticker = null;
     stream?.getTracks().forEach((t) => t.stop());
-    send({ type: "os-stopped", size: blob.size, type: "video/webm" });
+    send({ type: "os-stopped", size: blob.size, contentType: "video/webm" });
   };
   stream.getVideoTracks()[0].addEventListener("ended", () => send({ type: "os-ended" }));
   recorder.start(1000);
@@ -38,7 +38,7 @@ async function start(streamId) {
 
 function pause() { if (recorder?.state === "recording") { recorder.pause(); pausedAt = Date.now(); } }
 function resume() { if (recorder?.state === "paused") { recorder.resume(); pausedTotal += Date.now() - pausedAt; pausedAt = 0; } }
-function stop() { if (recorder && recorder.state !== "inactive") recorder.stop(); else send({ type: "os-stopped", size: blob?.size ?? 0, type: "video/webm" }); }
+function stop() { if (recorder && recorder.state !== "inactive") recorder.stop(); else send({ type: "os-stopped", size: blob?.size ?? 0, contentType: "video/webm" }); }
 function discard() { clearInterval(ticker); ticker = null; try { if (recorder && recorder.state !== "inactive") { recorder.onstop = null; recorder.stop(); } } catch {} stream?.getTracks().forEach((t) => t.stop()); chunks = []; blob = null; }
 
 function upload(uploadUrl, contentType) {

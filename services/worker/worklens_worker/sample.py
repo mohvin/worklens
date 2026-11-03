@@ -8,6 +8,7 @@ removes 60-80% of frames before any model is called.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -23,14 +24,29 @@ KEEP_CHANGE = 0.02  # fraction of thumbnail pixels changed since the last kept f
 
 
 def probe_duration(video: Path) -> float:
+    """Container duration; falls back to decoding the stream when the container has none
+    (WebM written by a browser's MediaRecorder carries no duration header)."""
     out = subprocess.run(
-        [
-            "ffprobe", "-v", "error", "-show_entries", "format=duration",
-            "-of", "json", str(video),
-        ],
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration:stream=duration", "-of", "json", str(video)],
         check=True, capture_output=True, text=True,
     ).stdout
-    return float(json.loads(out)["format"]["duration"])
+    info = json.loads(out)
+    for d in [info.get("format", {}).get("duration")] + [st.get("duration") for st in info.get("streams", [])]:
+        try:
+            if d is not None and float(d) > 0:
+                return float(d)
+        except (TypeError, ValueError):
+            pass
+    # decode without output; ffmpeg reports the last timestamp on stderr ("time=00:01:21.40")
+    err = subprocess.run(
+        ["ffmpeg", "-v", "info", "-nostats", "-i", str(video), "-f", "null", "-"],
+        capture_output=True, text=True,
+    ).stderr
+    m = re.findall(r"time=(\d+):(\d+):(\d+(?:\.\d+)?)", err)
+    if m:
+        h, mi, se = m[-1]
+        return int(h) * 3600 + int(mi) * 60 + float(se)
+    raise ValueError(f"could not determine the duration of {video.name}")
 
 
 def extract_frames(video: Path, out_dir: Path, fps: float = 1.0) -> list[Path]:

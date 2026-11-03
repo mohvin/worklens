@@ -20,6 +20,7 @@ from .rules import run_rules
 from .sam import SamClient
 from .sample import kept_frames, sample
 from .store import RunStore
+from .tablog import apply_tab_log
 
 Progress = Callable[[str, Run, str], None]  # (stage, run, human-readable line)
 
@@ -47,6 +48,7 @@ def run_pipeline(
     workers: int = 4,
     segment: str = "auto",
     progress: Progress = _noop,
+    tab_log: list[dict] | None = None,
 ) -> Run:
     r = sample(run, run_dir, video, fps=fps)
     store.save(r)
@@ -81,6 +83,10 @@ def run_pipeline(
             f"labelled {ok}/{len(r.steps)} steps with {client.cfg.model}: "
             f"{len(fresh)} API calls, {len(lab) - len(fresh)} cached, ${r.total_cost_usd:.4f}",
         )
+        if tab_log:
+            r, n = apply_tab_log(r, tab_log)
+            store.save(r)
+            progress("labelling", r, f"tab log: {len(tab_log)} entries; {n} step application{'s' if n != 1 else ''} aligned to the browser host")
 
     r = run_rules(build(r))
     store.save(r)

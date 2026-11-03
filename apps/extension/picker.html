@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>WorkLens — choose what to record</title>
+<title>WorkLens — recording</title>
 <link rel="stylesheet" href="popup.css">
-<style>body{min-width:0;width:380px;padding:18px 20px}h1{font-size:15px;margin:0 0 6px}p{margin:0;color:#6b6480;font-size:13px;line-height:1.45}</style>
+<style>body{min-width:0;width:auto;padding:26px 30px}h1{font-size:16px;margin:0 0 8px}p{margin:0;color:#6b6480;font-size:13px;line-height:1.5;max-width:52ch}</style>
 </head>
 <body>
-<h1>Choose what to record</h1>
-<p>Chrome is showing its picker. Pick <b>Entire Screen</b> for a task that spans several apps, then <b>Share</b>. This window closes by itself.</p>
+<h1 id="h">Choose what to record</h1>
+<p id="p">Chrome is showing its picker. Pick <b>Entire Screen</b> for a task that spans several apps, then <b>Share</b>.</p>
+<script src="offscreen.js"></script>
 <script src="picker.js"></script>
 </body>
 </html>
