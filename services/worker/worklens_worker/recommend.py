@@ -420,7 +420,9 @@ def build_target(items: list[Recommendation], runs: list[Run], roles: list[str],
             steps.append(TargetStep(ref=Ref(rec=rec, step=s.index, node_id=_node_for(run, s.index)), application=_app(s), action=s.label.action if s.label else "unlabelled step",
                                     disposition=disp[k], recommendation_ids=rec_ids[k], seconds_before=round(s.duration, 3), seconds_after=round(after[k], 3)))
     before_total = sum(s.seconds_before for s in steps)
-    live = [s for s in steps if s.disposition in ("keep", "assist") or s.seconds_after > 0.05]
+    # a step counts as gone when a person no longer does it (removed or automated), even if a residual
+    # fraction of its time remains in the estimate; this matches what the UI labels removed/automated
+    live = [s for s in steps if s.disposition in ("keep", "assist")]
     switches = lambda seq: sum(1 for a, b in zip(seq, seq[1:]) if normalise(a.application) != normalise(b.application))  # noqa: E731
     in_app = any(i.mechanism == "in_app_approval" and i.status in include for i in snapshot)
     decisions = sum(1 for s in steps if s.disposition == "keep" and DECISION_RE.search(s.action))
