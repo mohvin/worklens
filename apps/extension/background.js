@@ -69,6 +69,11 @@ async function logActiveTab(reason) {
   await setState({ tabLog, current: entry });
 }
 chrome.tabs.onActivated.addListener(() => logActiveTab("switch"));
+// picker window closed without a choice -> back to idle, keeping what was typed
+chrome.windows.onRemoved.addListener(async (id) => {
+  const s = await getState();
+  if (s.phase === "picking" && s.pickerWindowId === id) await setState({ ...INITIAL, base: s.base, role: s.role, processId: s.processId, newProcessName: s.newProcessName });
+});
 chrome.tabs.onUpdated.addListener((_id, info, tab) => { if (tab.active && (info.title || info.url)) logActiveTab("navigate"); });
 chrome.windows.onFocusChanged.addListener((id) => { if (id !== chrome.windows.WINDOW_ID_NONE) logActiveTab("window"); });
 
@@ -84,13 +89,32 @@ async function api(base, path, body) {
 async function start({ role, processId, newProcessName }) {
   const s = await getState();
   if (s.phase !== "idle" && s.phase !== "done" && s.phase !== "error") return s;
-  await ensureOffscreen();
-  // No target tab: the stream must be usable by the extension's own offscreen page, not by the site in the current tab.
-  const streamId = await new Promise((resolve) => chrome.desktopCapture.chooseDesktopMedia(["screen", "window", "tab"], (id) => resolve(id)));
-  if (!streamId) { await closeOffscreen(); return setState({ ...INITIAL, base: s.base, role, processId, newProcessName }); }
-  await setState({ ...INITIAL, base: s.base, phase: "recording", role, processId, newProcessName, startedAt: Date.now(), tabLog: [], current: null });
-  await toOffscreen({ type: "os-start", streamId });
-  await logActiveTab("start");
+  // Remember what was asked, then open a small extension window that owns Chrome's picker
+  // (chooseDesktopMedia needs a visible extension page; from the worker it returns nothing).
+  await setState({ ...INITIAL, base: s.base, phase: "picking", role, processId, newProcessName });
+  try {
+    const win = await chrome.windows.create({ url: chrome.runtime.getURL("picker.html"), type: "popup", width: 420, height: 150, focused: true });
+    await setState({ pickerWindowId: win.id });
+  } catch (e) {
+    return setState({ ...INITIAL, base: s.base, role, processId, newProcessName, phase: "error", error: `Could not open the picker: ${e.message}` });
+  }
+  return getState();
+}
+
+// The picker page reports the chosen stream (or "" when the person cancelled).
+async function picked(streamId) {
+  const s = await getState();
+  if (s.phase !== "picking") return s;
+  if (!streamId) return setState({ ...INITIAL, base: s.base, role: s.role, processId: s.processId, newProcessName: s.newProcessName });
+  try {
+    await ensureOffscreen();
+    await setState({ phase: "recording", startedAt: Date.now(), tabLog: [], current: null, pickerWindowId: null });
+    await toOffscreen({ type: "os-start", streamId });
+    setTimeout(() => logActiveTab("start"), 400);   // after the picker window has closed
+  } catch (e) {
+    await closeOffscreen();
+    return setState({ phase: "error", error: `Could not start the capture: ${e.message}` });
+  }
   return getState();
 }
 
@@ -151,6 +175,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
     switch (msg?.type) {
       case "get-state": return reply(await getState());
       case "start": return reply(await start(msg));
+      case "picked": return reply(await picked(msg.streamId));
       case "pause": await toOffscreen({ type: "os-pause" }); return reply(await setState({ phase: "paused" }));
       case "resume": await toOffscreen({ type: "os-resume" }); return reply(await setState({ phase: "recording" }));
       case "stop": return reply(await stop());

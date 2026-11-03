@@ -39,7 +39,7 @@ function render(s) {
   $("ws").textContent = hostname;
   $("link-open").href = s.base;
   $("base").value = s.base;
-  if (s.phase === "idle") {
+  if (s.phase === "idle" || s.phase === "picking") {
     show("s-idle");
     if (document.activeElement !== $("role")) $("role").value = s.role || $("role").value;
     $("idle-err").hidden = true;
@@ -96,7 +96,7 @@ $("btn-start").addEventListener("click", async () => {
   const s = await send({ type: "start", role, processId: pv === "new" ? "" : pv, newProcessName: pv === "new" ? newName : "" });
   $("btn-start").disabled = false;
   if (s) render({ ...s, processName: s.processName || (pv && pv !== "new" ? processes.find((p) => p.id === pv)?.name : "") });
-  if (s?.phase === "recording") window.close();
+  if (s?.phase === "recording" || s?.phase === "picking") window.close();
 });
 $("btn-pause").addEventListener("click", async () => render(await send({ type: "pause" })));
 $("btn-resume").addEventListener("click", async () => render(await send({ type: "resume" })));
