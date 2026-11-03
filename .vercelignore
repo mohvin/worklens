@@ -1,9 +1,9 @@
-.git
-.venv
-node_modules
-runs
-services
-samples/*.mp4
+/.git
+/.venv
+/node_modules
+/runs
+/services
+/samples/*.mp4
 .env
 .env.*
 *.pyc

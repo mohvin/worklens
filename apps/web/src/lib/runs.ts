@@ -36,8 +36,7 @@ export async function listRuns(): Promise<RunListing[]> {
     id, source: s.run.source, duration: s.run.duration, status: s.run.status, findings: s.run.findings.length, mtime: s.mtime, kind: "sample",
   }));
   for (const row of await listRunRows()) {
-    const p = row.progress as { steps?: number; findings?: number };
-    out.push({ id: row.id, source: row.source, duration: 0, status: row.status, findings: p.findings ?? 0, mtime: Date.parse(row.updated_at), kind: "hosted", role: row.role ?? null, processId: row.process_id ?? null });
+    out.push({ id: row.id, source: row.source, duration: Number(row.duration ?? 0), status: row.status, findings: Array.isArray(row.findings) ? row.findings.length : 0, mtime: Date.parse(row.updated_at), kind: "hosted", role: row.role ?? null, processId: row.process_id ?? null });
   }
   let entries: string[] = [];
   try { entries = await fs.readdir(runsDir()); } catch { entries = []; }

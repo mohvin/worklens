@@ -15,6 +15,7 @@ export interface RunRow {
   id: string; source: string; size_bytes: number; status: string; progress: Record<string, unknown>;
   error: string | null; run_json: unknown | null; cost_usd: number; created_at: string; updated_at: string;
   process_id?: string | null; role?: string | null; position?: number; recommendations_json?: unknown | null;
+  duration?: number | null; findings?: unknown[] | null;   // projected from run_json by listRunRows
 }
 
 export interface ProcessRow {
@@ -32,7 +33,7 @@ export async function getRunRow(id: string, select = "*"): Promise<RunRow | null
 
 export async function listRunRows(limit = 25): Promise<RunRow[]> {
   if (!supabaseConfigured()) return [];
-  const r = await fetch(`${URL_}/rest/v1/runs?select=id,source,size_bytes,status,progress,error,cost_usd,created_at,updated_at,process_id,role,position&order=created_at.desc&limit=${limit}`, { headers: headers(), cache: "no-store" });
+  const r = await fetch(`${URL_}/rest/v1/runs?select=id,source,size_bytes,status,progress,error,cost_usd,created_at,updated_at,process_id,role,position,duration:run_json->duration,findings:run_json->findings&order=created_at.desc&limit=${limit}`, { headers: headers(), cache: "no-store" });
   return r.ok ? ((await r.json()) as RunRow[]) : [];
 }
 
