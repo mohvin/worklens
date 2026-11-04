@@ -4,7 +4,7 @@
 
 Process mining today needs system logs. Most work happens on screens nobody logs: mail, PDFs, an ERP form, a spreadsheet. WorkLens takes a screen recording of someone doing a task and turns it into a process map with step durations and bottlenecks, using Meta's models to understand what is on screen.
 
-**Demo video:** https://youtu.be/Non0tgrZq74 (3 min) · **Live app:** https://worklens-iota.vercel.app · **Demo data:** a real invoice approval across Gmail and Odoo, two roles, recorded with the Chrome extension.
+**Demo video:** https://youtu.be/RWYPNcsSTuU (3 min) · **Live app:** https://worklens-iota.vercel.app · **Demo data:** a real invoice approval across Gmail and Odoo, two roles, recorded with the Chrome extension.
 
 Built for the [Meta Global AI Developer Hackathon](https://cerebralvalley.ai/e/meta-ai-developer-hackathon), Oct 26 to Nov 4 2026, Startup track, by [PurpleAI Labs](https://purplelab.ai). All code in this repository was written during the hackathon window.
 
