@@ -20,6 +20,9 @@ def test_plausible():
     assert plausible("Browser", "anything.com", "Anything")
     assert not plausible("PDF Viewer", "mail.google.com", "Gmail")
     assert not plausible("Excel", "alm-corp.odoo.com", "Odoo")
+    assert plausible("Accounting", "alm-corp.odoo.com", "Odoo")
+    assert plausible("Odoo Accounting", "alm-corp.odoo.com", "Odoo")
+    assert not plausible("Accounting", "mail.google.com", "Gmail")
 
 
 def test_apply_tab_log_rewrites_only_plausible():

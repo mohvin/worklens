@@ -21,13 +21,20 @@ async function getState() {
   const { base } = await chrome.storage.sync.get("base");
   return { ...INITIAL, ...(state ?? {}), base: base || DEFAULT_BASE };
 }
-async function setState(patch) {
-  const s = await getState();
-  const next = { ...s, ...patch };
-  await chrome.storage.session.set({ state: next });
-  await badge(next);
-  chrome.runtime.sendMessage({ type: "state", state: next }).catch(() => {});
-  return next;
+// Writes are serialised: without this a 1-second tick could read "recording" and write it
+// back over "stopping", which made the stream-ended event trigger a second stop (two uploads).
+let _chain = Promise.resolve();
+function setState(patch) {
+  const run = _chain.then(async () => {
+    const s = await getState();
+    const next = { ...s, ...(typeof patch === "function" ? patch(s) : patch) };
+    await chrome.storage.session.set({ state: next });
+    await badge(next);
+    chrome.runtime.sendMessage({ type: "state", state: next }).catch(() => {});
+    return next;
+  });
+  _chain = run.catch(() => {});
+  return run;
 }
 
 // ---------- badge ----------
@@ -133,7 +140,9 @@ const slug = (t) => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
 // The offscreen page has the file: create the run, hand it the signed URL.
 async function onStopped({ size, contentType }) {
   const type = contentType || "video/webm";
-  const s = await getState();
+  // claim the transition atomically: a second os-stopped (or a late one) does nothing
+  const s = await setState((cur) => (cur.phase === "stopping" ? { phase: "creating" } : {}));
+  if (s.phase !== "creating") return;
   try {
     let processId = s.processId, processName = s.processName;
     if (!processId && s.newProcessName) {
@@ -179,7 +188,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
       case "reset": { const s = await getState(); return reply(await setState({ ...INITIAL, base: s.base, role: s.role, processId: s.processId })); }
       case "set-base": { await chrome.storage.sync.set({ base: (msg.base || DEFAULT_BASE).replace(/\/$/, "") }); return reply(await getState()); }
       // from the offscreen page
-      case "os-tick": return reply(await setState({ elapsed: msg.elapsed, bytes: msg.bytes }));
+      case "os-tick": return reply(await setState((cur) => (cur.phase === "recording" || cur.phase === "paused" ? { elapsed: msg.elapsed, bytes: msg.bytes } : {})));
       case "os-stopped": await onStopped(msg); return reply(true);
       case "os-progress": return reply(await setState({ upload: { pct: msg.pct, loaded: msg.loaded, total: msg.total } }));
       case "os-uploaded": await onUploaded(); return reply(true);

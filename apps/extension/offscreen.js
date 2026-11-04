@@ -22,13 +22,13 @@ async function start(streamId) {
   }
   const mime = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find((m) => MediaRecorder.isTypeSupported(m)) || "";
   recorder = new MediaRecorder(stream, { mimeType: mime || undefined, videoBitsPerSecond: 2_500_000 });
-  chunks = []; bytes = 0; blob = null; pausedAt = 0; pausedTotal = 0;
+  chunks = []; bytes = 0; blob = null; pausedAt = 0; pausedTotal = 0; reported = false;
   recorder.ondataavailable = (e) => { if (e.data && e.data.size) { chunks.push(e.data); bytes += e.data.size; } };
   recorder.onstop = () => {
     blob = new Blob(chunks, { type: "video/webm" });
     clearInterval(ticker); ticker = null;
     stream?.getTracks().forEach((t) => t.stop());
-    send({ type: "os-stopped", size: blob.size, contentType: "video/webm" });
+    if (!reported) { reported = true; send({ type: "os-stopped", size: blob.size, contentType: "video/webm" }); }
   };
   stream.getVideoTracks()[0].addEventListener("ended", () => send({ type: "os-ended" }));
   recorder.start(1000);
@@ -38,7 +38,8 @@ async function start(streamId) {
 
 function pause() { if (recorder?.state === "recording") { recorder.pause(); pausedAt = Date.now(); } }
 function resume() { if (recorder?.state === "paused") { recorder.resume(); pausedTotal += Date.now() - pausedAt; pausedAt = 0; } }
-function stop() { if (recorder && recorder.state !== "inactive") recorder.stop(); else send({ type: "os-stopped", size: blob?.size ?? 0, contentType: "video/webm" }); }
+let reported = false;
+function stop() { if (recorder && recorder.state !== "inactive") recorder.stop(); else if (blob && !reported) { reported = true; send({ type: "os-stopped", size: blob.size, contentType: "video/webm" }); } }
 function discard() { clearInterval(ticker); ticker = null; try { if (recorder && recorder.state !== "inactive") { recorder.onstop = null; recorder.stop(); } } catch {} stream?.getTracks().forEach((t) => t.stop()); chunks = []; blob = null; }
 
 function upload(uploadUrl, contentType) {

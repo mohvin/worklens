@@ -28,6 +28,10 @@ KNOWN: list[tuple[str, str]] = [
     ("worklens", "WorkLens"), ("vercel.app", "Web app"),
 ]
 GENERIC = {"browser", "chrome", "web", "web browser", "website", "web app", "webpage", "tab", "unknown"}
+# module names a model may use instead of the suite's name (Odoo "Accounting", SAP "Finance", Zoho "Books")
+SUITES = {"Odoo", "SAP", "Zoho", "Microsoft 365", "Workday", "QuickBooks", "Xero", "Salesforce", "HubSpot", "ServiceNow", "Web app"}
+MODULES = {"accounting", "invoicing", "purchase", "purchasing", "sales", "inventory", "crm", "finance", "books", "payroll", "expenses", "projects",
+           "manufacturing", "helpdesk", "erp", "bills", "vendor bills", "accounts payable", "accounts receivable", "procurement", "timesheets", "dashboard"}
 STOP = {"the", "and", "app", "web", "page", "tab", "com", "www"}
 
 
@@ -54,6 +58,8 @@ def plausible(model_app: str, host: str, canonical: str) -> bool:
         return True
     toks = _tokens(m)
     if not toks:
+        return True
+    if canonical in SUITES and (m in MODULES or any(t in MODULES for t in toks)):
         return True
     target = _tokens(host) | _tokens(canonical)
     if toks & target:
