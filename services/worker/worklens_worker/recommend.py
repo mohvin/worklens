@@ -446,6 +446,7 @@ def build_recommendations(
     total = sum(r.summary.total_duration or r.duration for r in runs) or 1.0
     items = fix_catalogue(runs, roles, process)
     unavailable: str | None = None
+    fresh_model_call = classification is None
     if classification is None:
         if client is None:
             classification, unavailable = [], "no model configured for the AI path"
@@ -470,7 +471,7 @@ def build_recommendations(
     fix_s = sum(i.seconds_saved for i in items if i.path == "fix")
     ai_s = sum(i.seconds_saved for i in items if i.path == "ai")
     return Recommendations(
-        generated_at=previous.generated_at if previous and classification is not None else _now(), rules_version=RULES_VERSION, model=model, prompt_version=PROMPT_VERSION if model else None, factors=dict(FACTORS),
+        generated_at=previous.generated_at if previous and not fresh_model_call else _now(), rules_version=RULES_VERSION, model=model, prompt_version=PROMPT_VERSION if model else None, factors=dict(FACTORS),
         items=items, classification=classification, target=target, target_accepted=target_acc,
         summary=RecommendationsSummary(
             total_seconds=round(total, 3), fix_seconds=round(fix_s, 3), ai_seconds=round(ai_s, 3), counted_seconds=round(fix_s + ai_s, 3),
