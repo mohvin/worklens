@@ -122,6 +122,8 @@ async function picked(streamId) {
 
 async function stop() {
   const s = await getState();
+  // "stopping" again = the first os-stop did not land (or the recorder never answered): ask once more
+  if (s.phase === "stopping") { await toOffscreen({ type: "os-stop" }); return s; }
   if (s.phase !== "recording" && s.phase !== "paused") return s;
   await setState({ phase: "stopping" });
   await toOffscreen({ type: "os-stop" });

@@ -39,7 +39,11 @@ async function start(streamId) {
 function pause() { if (recorder?.state === "recording") { recorder.pause(); pausedAt = Date.now(); } }
 function resume() { if (recorder?.state === "paused") { recorder.resume(); pausedTotal += Date.now() - pausedAt; pausedAt = 0; } }
 let reported = false;
-function stop() { if (recorder && recorder.state !== "inactive") recorder.stop(); else if (blob && !reported) { reported = true; send({ type: "os-stopped", size: blob.size, contentType: "video/webm" }); } }
+function stop() {
+  if (recorder && recorder.state !== "inactive") { recorder.stop(); return; }
+  // asked again after the recorder already stopped: report the file (again if the first report was lost)
+  if (blob) { reported = true; send({ type: "os-stopped", size: blob.size, contentType: "video/webm" }); }
+}
 function discard() { clearInterval(ticker); ticker = null; try { if (recorder && recorder.state !== "inactive") { recorder.onstop = null; recorder.stop(); } } catch {} stream?.getTracks().forEach((t) => t.stop()); chunks = []; blob = null; }
 
 function upload(uploadUrl, contentType) {

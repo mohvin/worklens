@@ -53,6 +53,7 @@ function render(s) {
     show("s-up"); $("chip-send").hidden = false;
     const u = s.upload; const name = s.run?.source || "recording.webm";
     $("up-name").textContent = s.phase === "stopping" ? "Finishing the file…" : s.phase === "creating" ? "Creating the run…" : name;
+    if ($("btn-retry")) $("btn-retry").hidden = s.phase !== "stopping";
     $("up-pct").textContent = `${u.pct || 0}%`; $("up-bar").style.width = `${u.pct || 0}%`;
     $("up-bytes").textContent = u.total ? `${mb(u.loaded)} of ${mb(u.total)}` : "";
     if (u.pct > 0 && u.pct < 100) { if (!uploadStartedAt) uploadStartedAt = Date.now(); const rate = u.loaded / Math.max(1, Date.now() - uploadStartedAt); $("up-left").textContent = `about ${Math.max(1, Math.round((u.total - u.loaded) / rate / 1000))} s left`; } else $("up-left").textContent = "";
@@ -101,6 +102,7 @@ $("btn-start").addEventListener("click", async () => {
 $("btn-pause").addEventListener("click", async () => render(await send({ type: "pause" })));
 $("btn-resume").addEventListener("click", async () => render(await send({ type: "resume" })));
 $("btn-stop").addEventListener("click", async () => render(await send({ type: "stop" })));
+$("btn-retry")?.addEventListener("click", async () => render(await send({ type: "stop" })));
 $("btn-discard").addEventListener("click", async () => render(await send({ type: "discard" })));
 $("btn-cancel").addEventListener("click", async () => render(await send({ type: "discard" })));
 $("btn-again").addEventListener("click", async () => { render(await send({ type: "reset" })); loadProcesses(state.base); });
